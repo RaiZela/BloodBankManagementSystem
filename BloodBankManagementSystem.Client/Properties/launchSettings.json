@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "BloodBankManagementSystem.Client": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "IIS"
+    }
+  },
+  "iisSettings": {
+    "windowsAuthentication": true,
+    "anonymousAuthentication": true
+  }
+}

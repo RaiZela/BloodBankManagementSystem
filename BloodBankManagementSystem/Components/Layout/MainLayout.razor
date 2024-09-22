@@ -1,0 +1,62 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+@attribute [Authorize]
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+<MudLayout>
+    <MudPaper Elevation="25">
+        <MudToolBar>
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e)=>DrawerToggle())" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Outlined.Notifications" />
+            <MudMenu Icon="@Icons.Material.Outlined.Notifications"
+                     AriaLabel="Open user menu">
+                <MudMenuItem>Profile</MudMenuItem>
+                <MudMenuItem>My account</MudMenuItem>
+                <MudMenuItem>Logout</MudMenuItem>
+            </MudMenu>
+            <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="MyCustomTheme"></MudThemeProvider>
+
+            <MudToggleIconButton @bind-Toggled="@_isDarkMode" Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Default"
+                                 ToggledIcon="@Icons.Material.Filled.WbSunny" ToggledColor="@Color.Default"></MudToggleIconButton>
+
+            <MudAvatar Color="Color.Success" Variant="Variant.Outlined">R</MudAvatar>
+        </MudToolBar>
+    </MudPaper>
+    <MudDrawer @bind-Open="@_drawerOpen">
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    bool _drawerOpen = false;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private bool _isDarkMode = true;
+    MudTheme MyCustomTheme = new MudTheme()
+        {
+            PaletteLight = new PaletteLight()
+            {
+                Primary = Colors.DeepPurple.Darken2,
+                Secondary = Colors.Green.Accent4,
+                AppbarBackground = Colors.BlueGray.Darken3
+            },
+
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.DeepPurple.Darken4,
+                Secondary = Colors.Green.Accent4,
+                AppbarBackground = Colors.BlueGray.Darken3
+            }
+        };
+}

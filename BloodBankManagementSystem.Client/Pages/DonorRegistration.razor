@@ -1,0 +1,99 @@
+﻿@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveAuto
+@using BloodBankManagementSystem.Client.Pages
+@using MudBlazor
+@using Shared.ViewModels;
+@using System.Net.Http.Json
+@using static General.Enums
+@inject HttpClient httpClient
+
+<MudStack Spacing="4">
+    <EditForm Model="@Donor" OnValidSubmit="OnValidSubmit" FormName="Donor Registration">
+        <DataAnnotationsValidator />
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+            <MudItem>
+                <MudCard>
+                    <MudCardContent>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudTextField Label="First name"
+                                              @bind-Value="Donor.FirstName" For="@(() => Donor.FirstName)" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudTextField Label="Last name"
+                                              @bind-Value="Donor.LastName" For="@(() => Donor.LastName)" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudTextField Label="ID"
+                                              @bind-Value="Donor.IdNumber" For="@(() => Donor.IdNumber)" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudDatePicker Label="dd.MM.yyyy" Editable="true" @bind-Date="Donor.Birthday" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="de-AT Date" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudTextField Label="Email" Class="mt-3"
+                                              @bind-Value="Donor.Email" For="@(() => Donor.Email)" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudTextField Label="Phone Number" Class="mt-3"
+                                              @bind-Value="Donor.PhoneNumber" For="@(() => Donor.PhoneNumber)" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudSelect T="Gender" @bind-Value="Donor.Gender" Label="Gender">
+                                    @foreach (Gender gender in Enum.GetValues(typeof(Gender)))
+                                    {
+                                        <MudSelectItem T="Gender" Value="@gender">@gender.ToString()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudSelect T="DocumentType" @bind-Value="Donor.DocumentType" Label="Document Type">
+                                    @foreach (DocumentType docType in Enum.GetValues(typeof(DocumentType)))
+                                    {
+                                        <MudSelectItem T="DocumentType" Value="@docType">@docType.ToString()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton ButtonType="ButtonType.Submit" OnClick="() => MyMudStepper.NextStep()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Next</MudButton>
+                    </MudCardActions>
+                </MudCard>
+
+            </MudItem>
+        </MudContainer>
+    </EditForm>
+
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudButton OnClick="() => MyStep.ToggleError(!MyStep.HasError)">Toggle error</MudButton>
+    </MudStack>
+
+</MudStack>
+
+@code {
+
+    [CascadingParameter] public MyMudStepper MyMudStepper { get; set; } = default!;
+    [CascadingParameter] public MyMudStep MyStep { get; set; } = default!;
+
+    private void OnValidSubmit(EditContext context)
+    {
+        StateHasChanged();
+    }
+
+
+    public int Value = 50;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+
+    public void ToggleError()
+    {
+        MyStep.ToggleError(!MyStep.HasError);
+        StateHasChanged();
+    }
+
+}

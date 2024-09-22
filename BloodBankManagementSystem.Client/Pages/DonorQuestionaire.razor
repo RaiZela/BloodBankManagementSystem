@@ -1,0 +1,85 @@
+﻿@page "/add-question"
+@using MudBlazor
+@using Shared.ViewModels
+@using static General.Enums
+@using General
+@using System.Net.Http.Json
+@inject HttpClient httpClient
+
+<PageTitle>Questionaire</PageTitle>
+
+<MudDataGrid T="QuestionViewModel" MultiSelection="true" Items="@Questions" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+             Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
+             StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
+             Bordered="true" Dense="true" EditTrigger="@DataGridEditTrigger.Manual" @ref="@_dataGrid">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Questions</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="QuestionViewModel" />
+        <PropertyColumn Property="x => x.QuestionText" />
+        <PropertyColumn Property="x => x.QuestionCategory">
+            <EditTemplate>
+                <MudSelect T="QuestionCategory" @bind-Value="context.Item.QuestionCategory" Label="Category">
+                    @foreach (QuestionCategory category in Enum.GetValues(typeof(QuestionCategory)))
+                    {
+                        <MudSelectItem T="QuestionCategory" Value="@category">@category.GetDisplayName()</MudSelectItem>
+                    }
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+
+        <PropertyColumn Property="x => x.QuestionType">
+            <EditTemplate>
+                <MudSelect T="QuestionType" @bind-Value="context.Item.QuestionType" Label="Type">
+                    @foreach (QuestionType type in Enum.GetValues(typeof(QuestionType)))
+                    {
+                        <MudSelectItem T="QuestionType" Value="@type">@type.GetDisplayName()</MudSelectItem>
+                    }
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Answers" Hidden="true">
+            <EditTemplate>
+                <MudList>
+                    @foreach (var answer in context.Item.Answers)
+                    {
+                        <MudListItem>
+                            <MudTextField T="string" @bind-Value="answer.AnswerText" Label="Answer" />
+                        </MudListItem>
+                    }
+                    <MudListItem>
+                        <MudTextField T="string" @bind-Value="newAnswerText" Label="New Answer" />
+                        <MudButton OnClick="@(async () => await AddNewAnswer(context.Item))">Add Answer</MudButton>
+                    </MudListItem>
+                </MudList>
+            </EditTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-end" HeaderClass="d-flex justify-center">
+            <HeaderTemplate>
+                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.AddCircle" OnClick="@(()=>_dataGrid.SetEditingItemAsync(new QuestionViewModel()))" />
+            </HeaderTemplate>
+            <CellTemplate>
+                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudIconButton Size="@Size.Medium" Style="@($"color:{Colors.Red.Accent4}; background:{Colors.Shades.White};")" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(()=>OnDeleteButtonClickedAsync(context.Item))" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="QuestionViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+
+<MudMessageBox @ref="_mudMessageBox" Title="Warning" CancelText="Cancel">
+    <MessageContent>
+        Deleting can <b><i>not</i></b> be undone!
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
+    </YesButton>
+</MudMessageBox>
+
