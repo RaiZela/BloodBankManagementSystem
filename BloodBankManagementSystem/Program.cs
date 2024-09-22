@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using BloodBankManagementSystem;
+using BLL.Services.Users;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -106,6 +107,8 @@ builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IReactionService, ReactionService>();
 builder.Services.AddScoped<ISuspensionReasonService, SuspensionReasonService>();
 builder.Services.AddScoped<IUnitOfMeasurementService, UnitOfMeasurementService>();
+
+builder.Services.AddScoped<IUserService, UserService>();
 #endregion
 
 

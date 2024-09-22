@@ -4,15 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.ViewModels;
 using Shared;
 using BloodBankManagementSystem.BLL.Services.Donation;
+using BLL.Services.Donation;
 
 namespace BloodBankManagementSystem.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class DonorController : ControllerBase
+public class DonationController : ControllerBase
 {
-    private readonly IDonorService _service;
-    public DonorController(IDonorService service)
+    private readonly IDonationService _service;
+    public DonationController(IDonationService service)
     {
         _service = service;
     }
@@ -32,7 +33,7 @@ public class DonorController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] DonorViewModel value)
+    public async Task<IActionResult> Create([FromBody] DonationViewModel value)
     {
         var result = await _service.Add(value);
         return Ok(result);
@@ -40,7 +41,7 @@ public class DonorController : ControllerBase
 
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromBody] DonorViewModel value)
+    public async Task<IActionResult> Update([FromBody] DonationViewModel value)
     {
         var result = await _service.Update(value);
         return Ok(result);

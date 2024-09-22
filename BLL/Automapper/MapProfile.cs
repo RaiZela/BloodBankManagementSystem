@@ -24,9 +24,12 @@ public class MapProfile : AutoMapper.Profile
 
 
         CreateMap<Donor, DonorViewModel>().ReverseMap();
+        CreateMap<Donation, DonationViewModel>().ReverseMap();
 
 
         CreateMap<Question, QuestionViewModel>().ReverseMap();
         CreateMap<Answer, AnswerViewModel>().ReverseMap();
+
+        CreateMap<ApplicationUser, ApplicationUserViewModel>().ReverseMap();
     }
 }
