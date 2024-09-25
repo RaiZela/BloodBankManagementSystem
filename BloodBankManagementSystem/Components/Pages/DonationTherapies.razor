@@ -1,8 +1,7 @@
 ﻿@page "/donationTherapies"
-@rendermode @(new InteractiveAutoRenderMode(prerender: false))
+@rendermode InteractiveServer
 @using MudBlazor
 @using Shared.ViewModels
-@inject HttpClient httpClient
 
 <MudDataGrid T="DonationTherapyViewModel" MultiSelection="true" Items="@DonationTherapiesList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
@@ -57,3 +56,82 @@
         <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
     </YesButton>
 </MudMessageBox>
+
+
+@code{
+    [Inject] private IDonationTherapyService DonationTherapiesService { get; set; }
+    private IEnumerable<DonationTherapyViewModel> DonationTherapiesList = new List<DonationTherapyViewModel>();
+    private string _searchString = "";
+    private List<string> _events = new();
+    private bool _readOnly;
+    private MudMessageBox _mudMessageBox;
+    private string _state = "Message box hasn't been opened yet";
+    private MudDataGrid<DonationTherapyViewModel> _dataGrid = new MudDataGrid<DonationTherapyViewModel>();
+    private Func<DonationTherapyViewModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Code.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Description.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUpdatedGrid();
+    }
+
+    void StartedEditingItem(DonationTherapyViewModel item)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    void CanceledEditingItem(DonationTherapyViewModel item)
+    {
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    async void CommittedItemChanges(DonationTherapyViewModel item)
+    {
+        if (item.ID == 0)
+        {
+            var result = await DonationTherapiesService.Add(item);
+            if (result.Success)
+                _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        }
+        else
+        {
+            var result = await DonationTherapiesService.Update(item);
+            if (result.Success)
+                _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        }
+        await GetUpdatedGrid();
+        StateHasChanged();
+
+    }
+
+    private async Task OnDeleteButtonClickedAsync(DonationTherapyViewModel item)
+    {
+        bool? result = await _mudMessageBox.ShowAsync();
+        _state = result is null ? "Canceled" : "Deleted!";
+        if (result == true)
+        {
+            var actionResult = await DonationTherapiesService.Delete(item.ID);
+            if (actionResult.Success)
+                _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        }
+        await GetUpdatedGrid();
+        StateHasChanged();
+    }
+
+    private async Task GetUpdatedGrid()
+    {
+        var result = await DonationTherapiesService.GetAll();
+        DonationTherapiesList = result.Result == null ? DonationTherapiesList : result.Result;
+    }
+}

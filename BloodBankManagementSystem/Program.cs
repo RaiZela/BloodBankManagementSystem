@@ -1,5 +1,4 @@
 using AutoMapper;
-using BloodBankManagementSystem.Client.Pages;
 using BloodBankManagementSystem.Components;
 using BloodBankManagementSystem.Components.Account;
 using BloodBankManagementSystem.DAL;
@@ -14,7 +13,6 @@ using BloodBankManagementSystem.BLL.Services.Questions;
 using BloodBankManagementSystem.BLL.Services.Settings;
 using BloodBankManagementSystem.BLL.Services;
 using BloodBankManagementSystem.BLL;
-using BloodBankManagementSystem.Client.Services;
 using Shared.Messages;
 using General;
 using Serilog;
@@ -27,12 +25,12 @@ using BLL.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44383/api/") });
+//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44383/api/") });
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveServerComponents();
+    //.AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -63,11 +61,11 @@ builder.Services.AddMudServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers()
-       .AddJsonOptions(options =>
-       {
-           options.JsonSerializerOptions.PropertyNamingPolicy = null;
-       }); ;
+//builder.Services.AddControllers()
+//       .AddJsonOptions(options =>
+//       {
+//           options.JsonSerializerOptions.PropertyNamingPolicy = null;
+//       }); ;
 
 
 var mapperConfig = new MapperConfiguration(mc =>
@@ -112,17 +110,17 @@ builder.Services.AddScoped<IUserService, UserService>();
 #endregion
 
 
-#region WebAssemblyServices
-builder.Services.AddTransient<IClinicService, ClinicService>();
-builder.Services.AddTransient<ICitiesService, CitiesService>();
-builder.Services.AddTransient<IDonationSymptomsService, DonationSymptomsService>();
-builder.Services.AddTransient<IDonationTherapiesService, DonationTherapiesService>();
-builder.Services.AddTransient<IAntibodiesService, AntibodiesService>();
-builder.Services.AddTransient<IQuestionsService, QuestionsService>();
-builder.Services.AddTransient<IPoliciesService, PoliciesService>();
-#endregion
+//#region WebAssemblyServices
+//builder.Services.AddTransient<IClinicService, ClinicService>();
+//builder.Services.AddTransient<ICitiesService, CitiesService>();
+//builder.Services.AddTransient<IDonationSymptomsService, DonationSymptomsService>();
+//builder.Services.AddTransient<IDonationTherapiesService, DonationTherapiesService>();
+//builder.Services.AddTransient<IAntibodiesService, AntibodiesService>();
+//builder.Services.AddTransient<IQuestionsService, QuestionsService>();
+//builder.Services.AddTransient<IPoliciesService, PoliciesService>();
+//#endregion
 
-builder.Services.AddHttpClient();
+//builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton(Log.Logger);
 
@@ -171,12 +169,12 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(BloodBankManagementSystem.Client._Imports).Assembly);
+    .AddInteractiveServerRenderMode();
+    //.AddInteractiveWebAssemblyRenderMode()
+    //.AddAdditionalAssemblies(typeof(BloodBankManagementSystem.Components._Imports).Assembly);
 
 app.MapIdentityApi<ApplicationUser>();
-app.MapControllers();
+//app.MapControllers();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();

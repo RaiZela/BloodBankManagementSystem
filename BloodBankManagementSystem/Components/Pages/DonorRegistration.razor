@@ -1,11 +1,9 @@
 ﻿@using System.ComponentModel.DataAnnotations
-@rendermode InteractiveAuto
-@using BloodBankManagementSystem.Client.Pages
+@rendermode InteractiveServer
 @using MudBlazor
 @using Shared.ViewModels;
 @using System.Net.Http.Json
 @using static General.Enums
-@inject HttpClient httpClient
 
 <MudStack Spacing="4">
     <EditForm Model="@Donor" OnValidSubmit="OnValidSubmit" FormName="Donor Registration">
@@ -73,6 +71,7 @@
 
 @code {
 
+    DonorViewModel Donor = new DonorViewModel();
     [CascadingParameter] public MyMudStepper MyMudStepper { get; set; } = default!;
     [CascadingParameter] public MyMudStep MyStep { get; set; } = default!;
 

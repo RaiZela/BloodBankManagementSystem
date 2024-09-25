@@ -1,4 +1,3 @@
-using BloodBankManagementSystem.Client;
 using BloodBankManagementSystem.DAL;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -91,11 +90,11 @@ namespace BloodBankManagementSystem.Components.Account
 
                 if (userId != null && email != null)
                 {
-                    state.PersistAsJson(nameof(UserInfo), new UserInfo
-                    {
-                        UserId = userId,
-                        Email = email,
-                    });
+                    //state.PersistAsJson(nameof(UserInfo), new UserInfo
+                    //{
+                    //    UserId = userId,
+                    //    Email = email,
+                    //});
                 }
             }
         }
