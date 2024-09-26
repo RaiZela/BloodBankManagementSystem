@@ -127,86 +127,77 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         });
     }
 
-    //public override int SaveChanges()
-    //{
-    //    UpdateAuditEntities();
-    //    return base.SaveChanges();
-    //}
+    public override int SaveChanges()
+    {
+        UpdateAuditEntities();
+        return base.SaveChanges();
+    }
 
 
-    //public override int SaveChanges(bool acceptAllChangesOnSuccess)
-    //{
-    //    UpdateAuditEntities();
-    //    return base.SaveChanges(acceptAllChangesOnSuccess);
-    //}
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        UpdateAuditEntities();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
 
 
-    //public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
-    //{
-    //    UpdateAuditEntities();
-    //    return base.SaveChangesAsync(cancellationToken);
-    //}
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+    {
+        UpdateAuditEntities();
+        return base.SaveChangesAsync(cancellationToken);
+    }
 
 
-    //public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-    //{
-    //    UpdateAuditEntities();
-    //    return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-    //}
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+    {
+        UpdateAuditEntities();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
 
 
-    //private void UpdateAuditEntities()
-    //{
-    //    GetCurrentUser();
-    //    var modifiedEntries = ChangeTracker.Entries()
-    //        .Where(x => x.Entity is AuditableEntity && x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
+    private void UpdateAuditEntities()
+    {
+        var user=GetCurrentUser();
+        var modifiedEntries = ChangeTracker.Entries()
+            .Where(x => x.Entity is AuditableEntity && x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
 
 
-    //    foreach (var entry in modifiedEntries)
-    //    {
-    //        var entity = (AuditableEntity)entry.Entity;
-    //        var now = DateTime.Now;
+        foreach (var entry in modifiedEntries)
+        {
+            var entity = (AuditableEntity)entry.Entity;
+            var now = DateTime.Now;
 
-    //        switch (entry.State)
-    //        {
-    //            case EntityState.Added:
-    //                entity.IsDeleted = false;
-    //                entity.CreatedDate = now;
-    //                entity.CreatedBy = "user";
-    //                break;
-    //            case EntityState.Deleted:
-    //                entry.State = EntityState.Modified;
-    //                entity.IsDeleted = true;
-    //                entity.DeletedBy = "user";
-    //                base.Entry(entity).Property(x => x.CreatedBy).IsModified = false;
-    //                base.Entry(entity).Property(x => x.CreatedDate).IsModified = false;
-    //                break;
-    //            case EntityState.Detached:
-    //            case EntityState.Unchanged:
-    //            case EntityState.Modified:
-    //            default:
-    //                base.Entry(entity).Property(x => x.CreatedBy).IsModified = false;
-    //                base.Entry(entity).Property(x => x.CreatedDate).IsModified = false;
-    //                break;
-    //        }
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entity.IsDeleted = false;
+                    entity.CreatedDate = now;
+                    entity.CreatedBy = user;
+                    break;
+                case EntityState.Deleted:
+                    entry.State = EntityState.Modified;
+                    entity.IsDeleted = true;
+                    entity.DeletedBy = user;
+                    base.Entry(entity).Property(x => x.CreatedBy).IsModified = false;
+                    base.Entry(entity).Property(x => x.CreatedDate).IsModified = false;
+                    break;
+                case EntityState.Detached:
+                case EntityState.Unchanged:
+                case EntityState.Modified:
+                default:
+                    base.Entry(entity).Property(x => x.CreatedBy).IsModified = false;
+                    base.Entry(entity).Property(x => x.CreatedDate).IsModified = false;
+                    break;
+            }
 
-    //        entity.LastUpdatedDate = now;
-    //        entity.LastUpdatedBy = "user";
-    //    }
-    //}
+            entity.LastUpdatedDate = now;
+            entity.LastUpdatedBy = user;
+        }
+    }
 
-    //public void GetCurrentUser()
-    //{
-    //    var test = _httpContextAccessor.HttpContext.User.Identity.Name;
-    //    //// Access the HttpContext and retrieve the current user ID
-    //    //var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    //    //// Return the current user from the database based on the user ID
-    //    //if (userId != null)
-    //    //{
-    //    //    return Users.FirstOrDefault(u => u.Id == userId);
-    //    //}
-
-    //    //return null; // Return null if no user is found
-    //}
+    public string GetCurrentUser()
+    {
+        return _httpContextAccessor.HttpContext.User.Identity.Name;
+       
+    }
 }

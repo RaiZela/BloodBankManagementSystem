@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IReactionService
 {
@@ -57,7 +59,11 @@ public class ReactionService : IReactionService
     {
         try
         {
-            _repository.Update<Reaction>(_mapper.Map<Reaction>(value));
+            var record = await _repository.GetQueryable<Reaction>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<Reaction>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +76,7 @@ public class ReactionService : IReactionService
     {
         try
         {
-            var response = await _repository.GetQueryable<Reaction>().ToListAsync();
+            var response = await _repository.GetQueryable<Reaction>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ReactionViewModel>>.ApiOkResponse(_mapper.Map<List<ReactionViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +88,7 @@ public class ReactionService : IReactionService
     {
         try
         {
-            var response = await _repository.GetQueryable<Reaction>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<Reaction>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ReactionViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

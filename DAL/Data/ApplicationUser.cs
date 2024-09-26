@@ -9,5 +9,5 @@ public class ApplicationUser : IdentityUser
     public List<UserPolicy> Policies { get; set; }
     public UserStatus Status { get; set; }
 
-    public string PhotoBase64 { get; set; }
+    public string? PhotoBase64 { get; set; }
 }

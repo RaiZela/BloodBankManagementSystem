@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IEquipmentService
 {
@@ -57,7 +59,11 @@ public class EquipmentService : IEquipmentService
     {
         try
         {
-            _repository.Update<Equipment>(_mapper.Map<Equipment>(value));
+            var record = await _repository.GetQueryable<Equipment>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<Equipment>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +76,7 @@ public class EquipmentService : IEquipmentService
     {
         try
         {
-            var response = await _repository.GetQueryable<Equipment>().ToListAsync();
+            var response = await _repository.GetQueryable<Equipment>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<EquipmentViewModel>>.ApiOkResponse(_mapper.Map<List<EquipmentViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +88,7 @@ public class EquipmentService : IEquipmentService
     {
         try
         {
-            var response = await _repository.GetQueryable<Equipment>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<Equipment>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<EquipmentViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

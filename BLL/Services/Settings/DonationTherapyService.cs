@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IDonationTherapyService
 {
@@ -57,7 +59,10 @@ public class DonationTherapyService : IDonationTherapyService
     {
         try
         {
-            _repository.Update<DonationTherapy>(_mapper.Map<DonationTherapy>(value));
+            var record = await _repository.GetQueryable<DonationTherapy>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+            _repository.Update<DonationTherapy>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +75,7 @@ public class DonationTherapyService : IDonationTherapyService
     {
         try
         {
-            var response = await _repository.GetQueryable<DonationTherapy>().ToListAsync();
+            var response = await _repository.GetQueryable<DonationTherapy>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<DonationTherapyViewModel>>.ApiOkResponse(_mapper.Map<List<DonationTherapyViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public class DonationTherapyService : IDonationTherapyService
     {
         try
         {
-            var response = await _repository.GetQueryable<DonationTherapy>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<DonationTherapy>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<DonationTherapyViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

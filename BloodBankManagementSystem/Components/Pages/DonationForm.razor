@@ -1,4 +1,7 @@
 ﻿@page "/donation-form"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
 <MyMudStepper @ref="_stepper">
     <MyMudStep Title="Step 1" @ref="_steps[0]">
         <DonorRegistration/>

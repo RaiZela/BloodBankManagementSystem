@@ -57,7 +57,11 @@ public class DonationService : IDonationService
     {
         try
         {
-            _repository.Update<DAL.Data.DatabaseModels.Donation>(_mapper.Map<DAL.Data.DatabaseModels.Donation>(value));
+            var donation = await _repository.GetQueryable<DAL.Data.DatabaseModels.Donation>(x=>x.ID== value.ID).FirstOrDefaultAsync();
+            if (donation == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<DAL.Data.DatabaseModels.Donation>(_mapper.Map(value, donation));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +74,7 @@ public class DonationService : IDonationService
     {
         try
         {
-            var response = await _repository.GetQueryable<DAL.Data.DatabaseModels.Donation>().ToListAsync();
+            var response = await _repository.GetQueryable<DAL.Data.DatabaseModels.Donation>(x=>!x.IsDeleted).ToListAsync();
             return ApiResponse<List<DonationViewModel>>.ApiOkResponse(_mapper.Map<List<DonationViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +86,7 @@ public class DonationService : IDonationService
     {
         try
         {
-            var response = await _repository.GetQueryable<DAL.Data.DatabaseModels.Donation>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<DAL.Data.DatabaseModels.Donation>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<DonationViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

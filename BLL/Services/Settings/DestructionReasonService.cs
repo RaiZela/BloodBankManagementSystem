@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IDestructionReasonService
 {
@@ -57,7 +59,11 @@ public class DestructionReasonService : IDestructionReasonService
     {
         try
         {
-            _repository.Update<DestructionReason>(_mapper.Map<DestructionReason>(value));
+            var record = await _repository.GetQueryable<DestructionReason>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<DestructionReason>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +76,7 @@ public class DestructionReasonService : IDestructionReasonService
     {
         try
         {
-            var response = await _repository.GetQueryable<DestructionReason>().ToListAsync();
+            var response = await _repository.GetQueryable<DestructionReason>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<DestructionReasonViewModel>>.ApiOkResponse(_mapper.Map<List<DestructionReasonViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +88,7 @@ public class DestructionReasonService : IDestructionReasonService
     {
         try
         {
-            var response = await _repository.GetQueryable<DestructionReason>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<DestructionReason>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<DestructionReasonViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

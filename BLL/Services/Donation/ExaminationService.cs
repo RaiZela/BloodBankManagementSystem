@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services;
 
 public interface IExaminationService
 {
@@ -52,7 +54,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var examination = await _repository.GetQueryable<Examination>()
+            var examination = await _repository.GetQueryable<Examination>(x => !x.IsDeleted)
                                                .FirstOrDefaultAsync(e => e.ID == examinationId);
 
             return ApiResponse<ExaminationViewModel>.ApiOkResponse(_mapper.Map<ExaminationViewModel>(examination));
@@ -67,7 +69,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var examinations = await _repository.GetQueryable<Examination>().ToListAsync();
+            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<IEnumerable<ExaminationViewModel>>.ApiOkResponse(_mapper.Map<IEnumerable<ExaminationViewModel>>(examinations));
         }
         catch (Exception ex)
@@ -80,7 +82,11 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            _repository.Update(_mapper.Map<Examination>(examination));
+            var record = await _repository.GetQueryable<Examination>(x => x.ID == examination.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update(_mapper.Map(examination, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -139,7 +145,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var referenceValue = await _repository.GetQueryable<ReferenceValue>()
+            var referenceValue = await _repository.GetQueryable<ReferenceValue>(x => !x.IsDeleted)
                                                   .FirstOrDefaultAsync(r => r.ID == referenceValueId);
             if (referenceValue == null)
             {
@@ -157,7 +163,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var referenceValues = await _repository.GetQueryable<ReferenceValue>().ToListAsync();
+            var referenceValues = await _repository.GetQueryable<ReferenceValue>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<IEnumerable<ReferenceValueViewModel>>.ApiOkResponse(_mapper.Map<IEnumerable<ReferenceValueViewModel>>(referenceValues));
         }
         catch (Exception ex)
@@ -170,7 +176,11 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            _repository.Update(_mapper.Map<ReferenceValue>(referenceValue));
+            var record = await _repository.GetQueryable<Examination>(x => x.ID == referenceValue.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update(_mapper.Map(referenceValue, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }

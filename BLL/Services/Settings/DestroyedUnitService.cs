@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IDestroyedUnitService
 {
@@ -57,7 +59,10 @@ public class DestroyedUnitService : IDestroyedUnitService
     {
         try
         {
-            _repository.Update<DestroyedUnit>(_mapper.Map<DestroyedUnit>(value));
+            var record = await _repository.GetQueryable<DestroyedUnit>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+            _repository.Update<DestroyedUnit>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +75,7 @@ public class DestroyedUnitService : IDestroyedUnitService
     {
         try
         {
-            var response = await _repository.GetQueryable<DestroyedUnit>().ToListAsync();
+            var response = await _repository.GetQueryable<DestroyedUnit>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<DestroyedUnitViewModel>>.ApiOkResponse(_mapper.Map<List<DestroyedUnitViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public class DestroyedUnitService : IDestroyedUnitService
     {
         try
         {
-            var response = await _repository.GetQueryable<DestroyedUnit>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<DestroyedUnit>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<DestroyedUnitViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

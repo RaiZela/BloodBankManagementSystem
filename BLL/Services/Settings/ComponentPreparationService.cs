@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IComponentPreparationService
 {
@@ -57,7 +59,10 @@ public class ComponentPreparationService : IComponentPreparationService
     {
         try
         {
-            _repository.Update<ComponentPreparation>(_mapper.Map<ComponentPreparation>(value));
+            var record = await _repository.GetQueryable<ComponentPreparation>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+            _repository.Update<ComponentPreparation>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +75,7 @@ public class ComponentPreparationService : IComponentPreparationService
     {
         try
         {
-            var response = await _repository.GetQueryable<ComponentPreparation>().ToListAsync();
+            var response = await _repository.GetQueryable<ComponentPreparation>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ComponentPreparationViewModel>>.ApiOkResponse(_mapper.Map<List<ComponentPreparationViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public class ComponentPreparationService : IComponentPreparationService
     {
         try
         {
-            var response = await _repository.GetQueryable<ComponentPreparation>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<ComponentPreparation>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ComponentPreparationViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

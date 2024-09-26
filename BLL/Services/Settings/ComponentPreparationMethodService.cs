@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IComponentPreparationMethodService
 {
@@ -57,7 +59,10 @@ public class ComponentPreparationMethodService : IComponentPreparationMethodServ
     {
         try
         {
-            _repository.Update<ComponentPreparationMethod>(_mapper.Map<ComponentPreparationMethod>(value));
+            var record = await _repository.GetQueryable<ComponentPreparationMethod>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+            _repository.Update<ComponentPreparationMethod>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +75,7 @@ public class ComponentPreparationMethodService : IComponentPreparationMethodServ
     {
         try
         {
-            var response = await _repository.GetQueryable<ComponentPreparationMethod>().ToListAsync();
+            var response = await _repository.GetQueryable<ComponentPreparationMethod>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ComponentPreparationMethodViewModel>>.ApiOkResponse(_mapper.Map<List<ComponentPreparationMethodViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public class ComponentPreparationMethodService : IComponentPreparationMethodServ
     {
         try
         {
-            var response = await _repository.GetQueryable<ComponentPreparationMethod>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<ComponentPreparationMethod>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ComponentPreparationMethodViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

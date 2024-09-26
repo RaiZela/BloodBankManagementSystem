@@ -29,7 +29,7 @@ public class PolicyService : IPolicyService
 
     public async Task<ApiResponse<IEnumerable<PolicyViewModel>>> GetAllPoliciesAsync()
     {
-        var policies = await _repository.GetQueryable<Policy>().ToListAsync();
+        var policies = await _repository.GetQueryable<Policy>(x => !x.IsDeleted).ToListAsync();
 
         if (policies == null || policies.Count() == 0)
             return ApiResponse<IEnumerable<PolicyViewModel>>.ApiNoContentResponse();
@@ -40,7 +40,7 @@ public class PolicyService : IPolicyService
 
     public async Task<ApiResponse<PolicyViewModel>> GetPolicyByIdAsync(string id)
     {
-        var policy = await _repository.GetQueryable<Policy>((Policy policy) => policy.ID == id).FirstOrDefaultAsync();
+        var policy = await _repository.GetQueryable<Policy>((Policy policy) => policy.ID == id && !policy.IsDeleted).FirstOrDefaultAsync();
 
         if (policy == null)
             return ApiResponse<PolicyViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));

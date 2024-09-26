@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IProcessService
 {
@@ -57,7 +59,11 @@ public class ProcessService : IProcessService
     {
         try
         {
-            _repository.Update<Process>(_mapper.Map<Process>(value));
+            var record = await _repository.GetQueryable<Process>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<Process>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +76,7 @@ public class ProcessService : IProcessService
     {
         try
         {
-            var response = await _repository.GetQueryable<Process>().ToListAsync();
+            var response = await _repository.GetQueryable<Process>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ProcessViewModel>>.ApiOkResponse(_mapper.Map<List<ProcessViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +88,7 @@ public class ProcessService : IProcessService
     {
         try
         {
-            var response = await _repository.GetQueryable<Process>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<Process>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ProcessViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

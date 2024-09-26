@@ -4,7 +4,9 @@
 @using MudBlazor
 @using Shared.ViewModels;
 @using System.Net.Http.Json
-@inject HttpClient httpClient
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
 <MudDataGrid T="PolicyViewModel" MultiSelection="true" Items="@PoliciesList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
              StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"

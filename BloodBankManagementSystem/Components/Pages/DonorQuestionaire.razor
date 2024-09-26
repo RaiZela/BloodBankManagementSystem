@@ -7,6 +7,8 @@
 @using General
 
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <PageTitle>Questionaire</PageTitle>
 
@@ -22,10 +24,10 @@
     </ToolBarContent>
     <Columns>
         <SelectColumn T="QuestionViewModel" />
-        <PropertyColumn Property="x => x.QuestionText" />
-        <PropertyColumn Property="x => x.QuestionCategory">
+        <PropertyColumn Property="x => x.Text" />
+        <PropertyColumn Property="x => x.Category">
             <EditTemplate>
-                <MudSelect T="QuestionCategory" @bind-Value="context.Item.QuestionCategory" Label="Category">
+                <MudSelect T="QuestionCategory" @bind-Value="context.Item.Category" Label="Category">
                     @foreach (QuestionCategory category in Enum.GetValues(typeof(QuestionCategory)))
                     {
                         <MudSelectItem T="QuestionCategory" Value="@category">@category.GetDisplayName()</MudSelectItem>
@@ -34,9 +36,9 @@
             </EditTemplate>
         </PropertyColumn>
 
-        <PropertyColumn Property="x => x.QuestionType">
+        <PropertyColumn Property="x => x.Type">
             <EditTemplate>
-                <MudSelect T="QuestionType" @bind-Value="context.Item.QuestionType" Label="Type">
+                <MudSelect T="QuestionType" @bind-Value="context.Item.Type" Label="Type">
                     @foreach (QuestionType type in Enum.GetValues(typeof(QuestionType)))
                     {
                         <MudSelectItem T="QuestionType" Value="@type">@type.GetDisplayName()</MudSelectItem>
@@ -102,13 +104,13 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.QuestionText.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Text.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.QuestionType.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Type.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.QuestionCategory.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Category.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;

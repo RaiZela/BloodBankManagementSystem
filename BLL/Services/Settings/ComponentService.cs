@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IComponentService
 {
@@ -57,7 +59,10 @@ public class ComponentService : IComponentService
     {
         try
         {
-            _repository.Update<Component>(_mapper.Map<Component>(value));
+            var record = await _repository.GetQueryable<Component>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+            _repository.Update<Component>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +75,7 @@ public class ComponentService : IComponentService
     {
         try
         {
-            var response = await _repository.GetQueryable<Component>().ToListAsync();
+            var response = await _repository.GetQueryable<Component>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ComponentViewModel>>.ApiOkResponse(_mapper.Map<List<ComponentViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public class ComponentService : IComponentService
     {
         try
         {
-            var response = await _repository.GetQueryable<Component>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<Component>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ComponentViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

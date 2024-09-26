@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IProblemService
 {
@@ -57,7 +59,11 @@ public class ProblemService : IProblemService
     {
         try
         {
-            _repository.Update<Problem>(_mapper.Map<Problem>(value));
+            var record = await _repository.GetQueryable<Problem>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<Problem>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +76,7 @@ public class ProblemService : IProblemService
     {
         try
         {
-            var response = await _repository.GetQueryable<Problem>().ToListAsync();
+            var response = await _repository.GetQueryable<Problem>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ProblemViewModel>>.ApiOkResponse(_mapper.Map<List<ProblemViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +88,7 @@ public class ProblemService : IProblemService
     {
         try
         {
-            var response = await _repository.GetQueryable<Problem>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<Problem>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ProblemViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

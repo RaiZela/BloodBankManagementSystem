@@ -2,6 +2,9 @@
 @rendermode InteractiveServer
 @using MudBlazor
 @using Shared.ViewModels
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
 <MudDataGrid T="CityViewModel" MultiSelection="true" Items="@CitiesList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
              StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"

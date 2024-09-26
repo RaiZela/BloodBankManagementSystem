@@ -8,5 +8,5 @@ public class Answer : AuditableEntity
 
     [DeleteBehavior(DeleteBehavior.NoAction)]
     public virtual Question Question { get; set; }
-    public string AnswerText { get; set; }
+    public string? AnswerText { get; set; }
 }

@@ -59,7 +59,11 @@ public class UnitOfMeasurementService : IUnitOfMeasurementService
     {
         try
         {
-            _repository.Update<UnitOfMeasurement>(_mapper.Map<UnitOfMeasurement>(value));
+            var record = await _repository.GetQueryable<UnitOfMeasurement>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<UnitOfMeasurement>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -72,7 +76,7 @@ public class UnitOfMeasurementService : IUnitOfMeasurementService
     {
         try
         {
-            var response = await _repository.GetQueryable<UnitOfMeasurement>().ToListAsync();
+            var response = await _repository.GetQueryable<UnitOfMeasurement>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<UnitOfMeasurementViewModel>>.ApiOkResponse(_mapper.Map<List<UnitOfMeasurementViewModel>>(response));
         }
         catch (Exception ex)
@@ -84,7 +88,7 @@ public class UnitOfMeasurementService : IUnitOfMeasurementService
     {
         try
         {
-            var response = await _repository.GetQueryable<UnitOfMeasurement>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<UnitOfMeasurement>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<UnitOfMeasurementViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

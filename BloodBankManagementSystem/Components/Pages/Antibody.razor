@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @using MudBlazor
 @using Shared.ViewModels
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <MudDataGrid T="AntibodyViewModel" MultiSelection="true" Items="@AntibodiesList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"

@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IBagLotService
 {
@@ -57,7 +59,11 @@ public class BagLotService : IBagLotService
     {
         try
         {
-            _repository.Update<BagLot>(_mapper.Map<BagLot>(value));
+            var record = await _repository.GetQueryable<BagLot>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<BagLot>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +76,7 @@ public class BagLotService : IBagLotService
     {
         try
         {
-            var response = await _repository.GetQueryable<BagLot>().ToListAsync();
+            var response = await _repository.GetQueryable<BagLot>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<BagLotViewModel>>.ApiOkResponse(_mapper.Map<List<BagLotViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +88,7 @@ public class BagLotService : IBagLotService
     {
         try
         {
-            var response = await _repository.GetQueryable<BagLot>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<BagLot>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<BagLotViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

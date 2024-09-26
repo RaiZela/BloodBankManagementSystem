@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 
 public interface IComponentStorageSystemService
 {
@@ -57,7 +59,10 @@ public class ComponentStorageSystemService : IComponentStorageSystemService
     {
         try
         {
-            _repository.Update<ComponentStorageSystem>(_mapper.Map<ComponentStorageSystem>(value));
+            var record = await _repository.GetQueryable<ComponentStorageSystem>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+            _repository.Update<ComponentStorageSystem>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -70,7 +75,7 @@ public class ComponentStorageSystemService : IComponentStorageSystemService
     {
         try
         {
-            var response = await _repository.GetQueryable<ComponentStorageSystem>().ToListAsync();
+            var response = await _repository.GetQueryable<ComponentStorageSystem>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<ComponentStorageSystemViewModel>>.ApiOkResponse(_mapper.Map<List<ComponentStorageSystemViewModel>>(response));
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public class ComponentStorageSystemService : IComponentStorageSystemService
     {
         try
         {
-            var response = await _repository.GetQueryable<ComponentStorageSystem>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<ComponentStorageSystem>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<ComponentStorageSystemViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

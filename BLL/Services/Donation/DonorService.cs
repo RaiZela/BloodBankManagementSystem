@@ -55,7 +55,11 @@ public class DonorService : IDonorService
     {
         try
         {
-            _repository.Update<Donor>(_mapper.Map<Donor>(value));
+            var donor = await _repository.GetQueryable<Donor>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (donor == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<Donor>(_mapper.Map(value, donor));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }

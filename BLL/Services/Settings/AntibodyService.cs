@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Settings;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Settings;
 public interface IAntibodyService
 {
     public Task<ApiResponse<bool>> Add(AntibodyViewModel clinicsVm);
@@ -56,7 +58,11 @@ public class AntibodyService : IAntibodyService
     {
         try
         {
-            _repository.Update<Antibody>(_mapper.Map<Antibody>(value));
+            var record = await _repository.GetQueryable<Antibody>(x => x.ID == value.ID).FirstOrDefaultAsync();
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            _repository.Update<Antibody>(_mapper.Map(value, record));
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }
@@ -69,7 +75,7 @@ public class AntibodyService : IAntibodyService
     {
         try
         {
-            var response = await _repository.GetQueryable<Antibody>().ToListAsync();
+            var response = await _repository.GetQueryable<Antibody>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<List<AntibodyViewModel>>.ApiOkResponse(_mapper.Map<List<AntibodyViewModel>>(response));
         }
         catch (Exception ex)
@@ -81,7 +87,7 @@ public class AntibodyService : IAntibodyService
     {
         try
         {
-            var response = await _repository.GetQueryable<Antibody>(x => x.ID == id).FirstOrDefaultAsync();
+            var response = await _repository.GetQueryable<Antibody>(x => x.ID == id && !x.IsDeleted).FirstOrDefaultAsync();
             if (response == null)
                 return ApiResponse<AntibodyViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 

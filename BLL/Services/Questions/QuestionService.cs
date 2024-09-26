@@ -1,4 +1,6 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Questions;
+﻿using DAL.Data.DatabaseModels;
+
+namespace BloodBankManagementSystem.BLL.Services.Questions;
 
 public interface IQuestionService
 {
@@ -18,11 +20,12 @@ public class QuestionService : IQuestionService
 {
     private readonly IRepository<ApplicationDbContext> _repository;
     private readonly IMapper _mapper;
-
-    public QuestionService(IRepository<ApplicationDbContext> repository, IMapper mapper)
+    private readonly IMessageService _messageService;
+    public QuestionService(IRepository<ApplicationDbContext> repository, IMapper mapper, IMessageService messageService)
     {
         _repository = repository;
         _mapper = mapper;
+        _messageService = messageService;
     }
 
     public async Task<ApiResponse<bool>> CreateQuestionAsync(QuestionViewModel question)
@@ -43,7 +46,7 @@ public class QuestionService : IQuestionService
     {
         try
         {
-            var question = await _repository.GetQueryable<Question>()
+            var question = await _repository.GetQueryable<Question>(x => !x.IsDeleted)
                                     .Include(q => q.Answers)
                                     .FirstOrDefaultAsync(q => q.ID == questionId);
 
@@ -60,7 +63,7 @@ public class QuestionService : IQuestionService
     {
         try
         {
-            var questions = await _repository.GetQueryable<Question>()
+            var questions = await _repository.GetQueryable<Question>(x => !x.IsDeleted)
                                     .Include(q => q.Answers)
                                     .ToListAsync();
 
@@ -78,9 +81,38 @@ public class QuestionService : IQuestionService
     {
         try
         {
-            _repository.Update(_mapper.Map<Question>(question));
+            var record = await _repository.GetQueryable<Question>(x => x.ID == question.ID)
+                     .Include(x => x.Answers) 
+                     .FirstOrDefaultAsync();
+
+            if (record == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            List<Answer> answers = record.Answers;
+            foreach (var updatedAnswer in question.Answers)
+            {
+                var existingAnswer = answers.FirstOrDefault(x => x.ID == updatedAnswer.ID);
+
+                if (existingAnswer != null && existingAnswer.ID != 0)
+                {
+                    _mapper.Map(updatedAnswer, existingAnswer);
+                }
+                else
+                {
+                    answers.Add(_mapper.Map<Answer>(updatedAnswer));
+                }
+            }
+
+            answers.RemoveAll(a => !question.Answers.Any(x => x.ID == a.ID));
+
+            record.Answers = answers;
+            _mapper.Map(question, record);
+
+            _repository.Update(record);
             await _repository.SaveAsync();
+
             return ApiResponse<bool>.ApiOkResponse(true);
+
         }
         catch (Exception ex)
         {
@@ -130,7 +162,7 @@ public class QuestionService : IQuestionService
     {
         try
         {
-            var answer = await _repository.GetQueryable<Answer>()
+            var answer = await _repository.GetQueryable<Answer>(x => !x.IsDeleted)
                                     .FirstOrDefaultAsync(a => a.ID == answerId);
 
             return ApiResponse<AnswerViewModel>.ApiOkResponse(_mapper.Map<AnswerViewModel>(answer));
@@ -147,7 +179,7 @@ public class QuestionService : IQuestionService
     {
         try
         {
-            var answers = await _repository.GetQueryable<Answer>().ToListAsync();
+            var answers = await _repository.GetQueryable<Answer>(x => !x.IsDeleted).ToListAsync();
             return ApiResponse<IEnumerable<AnswerViewModel>>.ApiOkResponse(_mapper.Map<IEnumerable<AnswerViewModel>>(answers));
 
         }
