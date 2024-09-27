@@ -1,5 +1,6 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
+@using BloodBankManagementSystem.BLL.Services.Donation
 @using MudBlazor
 @using Shared.ViewModels;
 @using System.Net.Http.Json
@@ -8,6 +9,10 @@
 @attribute [Authorize]
 
 <MudStack Spacing="4">
+@*     @if (ShowAlert)
+    {
+        <MudAlert ContentAlignment="HorizontalAlignment.Center" id="Alert">Time to call. Please close me!</MudAlert>
+    } *@
     <EditForm Model="@Donor" OnValidSubmit="OnValidSubmit" FormName="Donor Registration">
         <DataAnnotationsValidator />
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
@@ -28,7 +33,7 @@
                                               @bind-Value="Donor.IdNumber" For="@(() => Donor.IdNumber)" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="4">
-                                <MudDatePicker Label="dd.MM.yyyy" Editable="true" @bind-Date="Donor.Birthday" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="de-AT Date" />
+                                <MudDatePicker Label="Birthday" Editable="true" @bind-Date="Donor.Birthday" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="de-AT Date" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="4">
                                 <MudTextField Label="Email" Class="mt-3"
@@ -54,10 +59,25 @@
                                     }
                                 </MudSelect>
                             </MudItem>
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudStack>
+                                    <MudSelect @bind-Value="Donor.CityID"
+                                               Variant="Variant.Text"
+                                               Label="BirthPlace"
+                                               Disabled="false"
+                                               Placeholder="BirthCity"
+                                               Clearable="true">
+                                        @foreach (var city in Cities)
+                                        {
+                                            <MudSelectItem Value="city.ID" >@city.Description</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudStack>
+                            </MudItem>
                         </MudGrid>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" OnClick="() => MyMudStepper.NextStep()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Next</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" OnClick="() => RegisterDonor(Donor)" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Next</MudButton>
                     </MudCardActions>
                 </MudCard>
 
@@ -76,6 +96,12 @@
     DonorViewModel Donor = new DonorViewModel();
     [CascadingParameter] public MyMudStepper MyMudStepper { get; set; } = default!;
     [CascadingParameter] public MyMudStep MyStep { get; set; } = default!;
+    [Inject] private IDonorService DonorService { get; set; }
+    [Inject] private ICityService CityService { get; set; }
+
+    private MudAlert Alert { get; set; }
+    private bool ShowAlert { get; set; }
+    private List<CityViewModel> Cities { get; set; } = new List<CityViewModel>();
 
     private void OnValidSubmit(EditContext context)
     {
@@ -87,6 +113,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var citiesList = (await CityService.GetAll()).Result ?? new List<CityViewModel>();
+        Cities = citiesList;
         await base.OnInitializedAsync();
     }
 
@@ -95,6 +123,12 @@
     {
         MyStep.ToggleError(!MyStep.HasError);
         StateHasChanged();
+    }
+
+    public async Task RegisterDonor(DonorViewModel donor)
+    {
+        var result = await DonorService.Add(donor);
+        MyMudStepper.NextStep();
     }
 
 }

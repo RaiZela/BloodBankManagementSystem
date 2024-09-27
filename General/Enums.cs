@@ -7,8 +7,8 @@ public class Enums
 {
     public enum Gender
     {
-        Male = 1,
-        Female = 2
+        Male,
+        Female
     }
 
     public enum DocumentType
@@ -24,8 +24,8 @@ public class Enums
         Text,
         [Display(Name = "Radiobutton")]
         Radio,
-        [Display(Name = "Checkbox")]
-        Checkbox,
+        [Display(Name = "SelectBox")]
+        SelectBox,
         [Display(Name = "Date")]
         Date,
         [Display(Name = "Number")]
@@ -78,19 +78,19 @@ public class Enums
 
     public enum SuspensionType
     {
-        Permanent = 1,
-        Temporary = 2
+        Permanent,
+        Temporary
     }
 
     public enum ComponentStatus
     {
-        Gained=1,
-        Discarded =2
+        Gained,
+        Discarded
     }
 
     public enum UserStatus
     {
-        Disabled=0,
-        Enabled=1
+        Disabled,
+        Enabled
     }
 }

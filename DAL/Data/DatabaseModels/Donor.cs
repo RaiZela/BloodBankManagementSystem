@@ -3,7 +3,7 @@
 [Table(nameof(Donor))]
 [PrimaryKey(nameof(ID))]
 
-public class Donor : BaseAuditableEntity
+public class Donor : AuditableEntity
 {
     public int ID { get; set; }
     public string FirstName { get; set; }

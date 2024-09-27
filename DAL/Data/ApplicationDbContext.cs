@@ -50,7 +50,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     #region Donors
     public DbSet<Donor> Donors { get; set; }
     public DbSet<SuspendedDonors> SuspendedDonors { get; set; }
-    public DbSet<DeletedDonors> DeletedDonors { get; set; }
 
     #endregion
 
@@ -197,7 +196,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public string GetCurrentUser()
     {
-        return _httpContextAccessor.HttpContext.User.Identity.Name;
+        return  _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "System";
        
     }
 }

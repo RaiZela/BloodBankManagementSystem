@@ -105,8 +105,8 @@ public class QuestionService : IQuestionService
 
             answers.RemoveAll(a => !question.Answers.Any(x => x.ID == a.ID));
 
-            record.Answers = answers;
             _mapper.Map(question, record);
+            record.Answers = answers;
 
             _repository.Update(record);
             await _repository.SaveAsync();
