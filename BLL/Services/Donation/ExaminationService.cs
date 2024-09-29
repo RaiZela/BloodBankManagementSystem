@@ -69,7 +69,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).ToListAsync();
+            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x=>x.ReferenceValues).ToListAsync();
             return ApiResponse<IEnumerable<ExaminationViewModel>>.ApiOkResponse(_mapper.Map<IEnumerable<ExaminationViewModel>>(examinations));
         }
         catch (Exception ex)

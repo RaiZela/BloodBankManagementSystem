@@ -11,71 +11,59 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<PageTitle>Questionaire</PageTitle>
+<PageTitle>Examinationa</PageTitle>
 
-<MudDataGrid T="QuestionViewModel" MultiSelection="true" Items="@Examinations" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+<MudDataGrid T="ExaminationViewModel" MultiSelection="true" Items="@Examinations" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
              StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
              Bordered="true" Dense="true" EditTrigger="@DataGridEditTrigger.Manual" @ref="@_dataGrid">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Questions</MudText>
+        <MudText Typo="Typo.h6">Examinations</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="QuestionViewModel" />
-        <PropertyColumn Property="x => x.Text" />
-        <PropertyColumn Property="x => x.Category">
-            <EditTemplate>
-                <MudSelect T="QuestionCategory" @bind-Value="context.Item.Category" Label="Category" Text="@context.Item.Category.GetDisplayName()">
-                    @foreach (QuestionCategory category in Enum.GetValues(typeof(QuestionCategory)))
-                    {
-                        <MudSelectItem T="QuestionCategory" Value="@category">@category.GetDisplayName()</MudSelectItem>
-                    }
-                </MudSelect>
-            </EditTemplate>
-        </PropertyColumn>
+        <SelectColumn T="ExaminationViewModel" />
+        <PropertyColumn Property="x => x.Code" />
+        <PropertyColumn Property="x => x.Description"/>
+            <PropertyColumn Property="x => x.IsEnabled">
+                <EditTemplate>
+                    <MudSwitch @bind-Value="context.Item.IsEnabled">
+                        </MudSwitch>
+                </EditTemplate>
+            </PropertyColumn>
 
-
-        <PropertyColumn Property="x => x.Type">
-            <EditTemplate>
-                <MudSelect T="QuestionType" @bind-Value="context.Item.Type" Label="Type">
-                    @foreach (QuestionType type in Enum.GetValues(typeof(QuestionType)))
-                    {
-                        <MudSelectItem T="QuestionType" Value="@type">@type.GetDisplayName()</MudSelectItem>
-                    }
-                </MudSelect>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.Answers" Hidden="true">
-            <EditTemplate>
-                <MudList>
-                    @foreach (var answer in context.Item.Answers)
-                    {
+            <PropertyColumn Property="x => x.ReferenceValues" Hidden="true">
+                <EditTemplate>
+                    <MudList>
+                        @foreach (var reference in context.Item.ReferenceValues)
+                        {
+                            <MudListItem>
+                                <MudNumericField T="decimal" @bind-Value="reference.MinValue" Label="Minimal Value" />
+                                <MudNumericField T="decimal" @bind-Value="reference.MaxValue" Label="Maximal Value" />
+                            </MudListItem>
+                        }
                         <MudListItem>
-                            <MudTextField T="string" @bind-Value="answer.AnswerText" Label="Answer" />
+                            <MudNumericField T="decimal?" @bind-Value="minValue" Label="Minimal Value" />
+                            <MudNumericField T="decimal?" @bind-Value="maxValue" Label="Maximal Value" />
+                            <MudButton OnClick="@(async () => await AddNewReferenceValue(context.Item))">Add Reference Value</MudButton>
                         </MudListItem>
-                    }
-                    <MudListItem>
-                        <MudTextField T="string" @bind-Value="newAnswerText" Label="New Answer" />
-                        <MudButton OnClick="@(async () => await AddNewAnswer(context.Item))">Add Answer</MudButton>
-                    </MudListItem>
-                </MudList>
-            </EditTemplate>
-        </PropertyColumn>
-        <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-end" HeaderClass="d-flex justify-center">
-            <HeaderTemplate>
-                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.AddCircle" OnClick="@(()=>_dataGrid.SetEditingItemAsync(new QuestionViewModel()))" />
-            </HeaderTemplate>
-            <CellTemplate>
-                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                <MudIconButton Size="@Size.Medium" Style="@($"color:{Colors.Red.Accent4}; background:{Colors.Shades.White};")" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(()=>OnDeleteButtonClickedAsync(context.Item))" />
-            </CellTemplate>
-        </TemplateColumn>
+                    </MudList>
+                </EditTemplate>
+            </PropertyColumn>
+            <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-end" HeaderClass="d-flex justify-center">
+                <HeaderTemplate>
+                    <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.AddCircle" OnClick="@(()=>_dataGrid.SetEditingItemAsync(new ExaminationViewModel()))" />
+                </HeaderTemplate>
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                    <MudIconButton Size="@Size.Medium" Style="@($"color:{Colors.Red.Accent4}; background:{Colors.Shades.White};")" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(()=>OnDeleteButtonClickedAsync(context.Item))" />
+                </CellTemplate>
+            </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="QuestionViewModel" />
+        <MudDataGridPager T="ExaminationViewModel" />
     </PagerContent>
 </MudDataGrid>
 
@@ -90,29 +78,27 @@
 </MudMessageBox>
 
 @code {
-    private List<ExaminationViewModel> Examinations = new List<ExaminationViewModel>();
+    private IEnumerable<ExaminationViewModel> Examinations = new List<ExaminationViewModel>();
     private string _searchString = "";
     private List<string> _events = new();
     private bool _readOnly;
     private MudMessageBox _mudMessageBox;
     private string _state = "Message box hasn't been opened yet";
-    private MudDataGrid<ExaminationResultViewModel> _dataGrid = new MudDataGrid<ExaminationResultViewModel>();
-    private string newAnswerText;
+    private MudDataGrid<ExaminationViewModel> _dataGrid = new MudDataGrid<ExaminationViewModel>();
+    private decimal? minValue;
+    private decimal? maxValue;
 
     [Inject] private IExaminationService ExaminationService { get; set; }
 
-    private Func<ExaminationResultViewModel, bool> _quickFilter => x =>
+    private Func<ExaminationViewModel, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.Text.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Code.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.Type.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if (x.Category.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Description.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;
@@ -125,8 +111,8 @@
 
     void StartedEditingItem(ExaminationViewModel item)
     {
-        if (item.Answers == null || item.Answers.Count == 0)
-            item.Answers = new List<ExaminationViewModel>();
+        if (item.ReferenceValues == null || item.ReferenceValues.Count == 0)
+            item.ReferenceValues = new List<ReferenceValueViewModel>();
 
         _events.Insert(0, $"Event = StartedEditingItem, Data = {JsonConvert.SerializeObject(item)}");
     }
@@ -140,13 +126,13 @@
     {
         if (item.ID == 0)
         {
-            var result = await ExaminationService.CreateQuestionAsync(item);
+            var result = await ExaminationService.CreateExaminationAsync(item);
             if (result.Success)
                 _events.Insert(0, $"Event = StartedEditingItem, Data = {JsonConvert.SerializeObject(item)}");
         }
         else
         {
-            var result = await ExaminationService.UpdateQuestionAsync(item);
+            var result = await ExaminationService.UpdateExaminationAsync(item);
             if (result.Success)
                 _events.Insert(0, $"Event = StartedEditingItem, Data = {JsonConvert.SerializeObject(item)}");
         }
@@ -161,7 +147,7 @@
         _state = result is null ? "Canceled" : "Deleted!";
         if (result == true)
         {
-            var actionResult = await ExaminationService.DeleteQuestionAsync(item.ID);
+            var actionResult = await ExaminationService.DeleteExaminationAsync(item.ID);
             if (actionResult.Success)
                 _events.Insert(0, $"Event = StartedEditingItem, Data = {JsonConvert.SerializeObject(item)}");
         }
@@ -171,16 +157,22 @@
 
     private async Task GetUpdatedGrid()
     {
-        var result = await QuestionsService.GetAllQuestionsAsync();
-        Examinations = (List<ExaminationViewModel>)(result.Result == null ? Questions : result.Result);
+        var result = await ExaminationService.GetAllExaminationsAsync();
+        Examinations = (List<ExaminationViewModel>)(result.Result == null ? Examinations : result.Result);
     }
 
-    private async Task AddNewAnswer(ExaminationViewModel question)
+    private async Task AddNewReferenceValue(ExaminationViewModel examination)
     {
-        if (!string.IsNullOrWhiteSpace(newAnswerText))
+        if (minValue != null && maxValue != null)
         {
-            question.Answers.Add(new AnswerViewModel { AnswerText = newAnswerText });
-            newAnswerText = string.Empty;
+            examination.ReferenceValues.Add(new ReferenceValueViewModel
+                {
+                    ExaminationID = examination.ID,
+                    MinValue = decimal.MinValue,
+                    MaxValue = decimal.MaxValue
+                });
+            minValue = 0;
+            maxValue = 0;
         }
     }
 }

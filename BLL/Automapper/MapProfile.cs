@@ -45,5 +45,13 @@ public class MapProfile : AutoMapper.Profile
 
         CreateMap<ApplicationUser, ApplicationUserViewModel>()
             .ReverseMap();
+
+
+        CreateMap<Examination, ExaminationViewModel>()
+            .ReverseMap();
+            //.ForMember(src => src.ReferenceValues, dest => dest.Ignore());
+
+
+        CreateMap<ReferenceValue, ReferenceValueViewModel>().ReverseMap();
     }
 }
