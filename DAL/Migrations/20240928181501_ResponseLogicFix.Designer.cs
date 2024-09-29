@@ -4,6 +4,7 @@ using BloodBankManagementSystem.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240928181501_ResponseLogicFix")]
+    partial class ResponseLogicFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,14 +144,14 @@ namespace DAL.Migrations
                         {
                             Id = "02174cf0–9412–4cfe - afbf - 59f706d72cf6",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "69e4a3ce-8242-46b5-bdae-1b0423679169",
+                            ConcurrencyStamp = "5ed03ee9-013d-4030-a18e-7fbe17db8a76",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedUserName = "RAIZELA@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEPNBteJloyfkmFpsUfK6h7L5vEQq5YEC4vZW4nrLIjLj1WW2auL5j6xy/pDs4WLKZQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIoKx7cKXKd/nYfw/sOny5/qgPHSPWp1rXh21V16xHXoyoiNhM72n3vPvrt+9SiMuA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "f5448c85-e206-4a07-866b-161825012651",
+                            SecurityStamp = "f3e87afc-e93e-4336-86f4-eafdd6fb465c",
                             Status = 0,
                             TwoFactorEnabled = false,
                             UserName = "raizela@gmail.com"
@@ -1748,6 +1751,7 @@ namespace DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Value")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -2659,7 +2663,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("DAL.Data.DatabaseModels.Donor", "Donor")
-                        .WithMany("QuestionaireResponses")
+                        .WithMany()
                         .HasForeignKey("DonorID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -2864,8 +2868,6 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Data.DatabaseModels.Donor", b =>
                 {
                     b.Navigation("Donations");
-
-                    b.Navigation("QuestionaireResponses");
 
                     b.Navigation("SuspensionReasons");
                 });

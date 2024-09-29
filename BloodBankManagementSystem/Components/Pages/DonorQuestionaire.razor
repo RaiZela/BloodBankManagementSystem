@@ -1,115 +1,120 @@
-﻿@using BLL.Services.Donation
-@using BloodBankManagementSystem.BLL.Services.Questions
-@using MudBlazor
-@using Newtonsoft.Json
-@using Shared.ViewModels
-@using static General.Enums
-@using General
-@rendermode InteractiveServer
-@using Microsoft.AspNetCore.Authorization
+﻿  @using BLL.Services.Donation
+ @using BloodBankManagementSystem.BLL.Services.Questions
+ @using MudBlazor
+ @using Newtonsoft.Json
+ @using Shared.ViewModels
+ @using static General.Enums
+ @using General
+ @rendermode InteractiveServer
+ @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<MudForm @ref="form" @onValidSubmit="SubmitAnswers"> 
-    @foreach (var categoryGroup in GroupedQuestionsByCategory)
-    {
-        <MudExpansionPanel Text="@categoryGroup.Key">
-            @foreach (var question in categoryGroup.Value)
-            {
-                <MudStack>
-                    <MudText Typo="Typo.h6">@question.Text</MudText>
-
-                    @if (question.Type == QuestionType.Text)
-                    {
-                        <!-- Text input question -->
-                        <MudTextField @bind-Value="question.Answers.FirstOrDefault()" Label="Answer" Placeholder="Type your answer here" />
-                    }
-                    else if (question.Type == QuestionType.SelectBox)
-                    {
-                        <!-- Dropdown question with predefined answers -->
-                        <MudSelect @bind-Value="question.Answers" Label="Select an answer">
-                            @foreach (var answer in question.Answers)
-                            {
-                                <MudSelectItem Value="answer.ID">@answer.AnswerText</MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
-                </MudStack>
-            }
-        </MudExpansionPanel>
+<style>
+    .category-header {
+        background-color: rgba(33, 150, 243, 1);
+        padding: 8px;
+        margin-bottom: 16px;
+        border-radius: 5px;
+        color: white;
     }
+</style>
+<MudPaper Class="pa-4">
 
-    <MudButton Type="Submit" Color="Color.Primary">Submit</MudButton>
-</MudForm>
+    <MudText Typo="Typo.h6" GutterBottom="true">Questionnaire</MudText>
+
+    @if (questionsList.Count == 0)
+    {
+        <MudText Typo="Typo.body1">No questions available.</MudText>
+    }
+    else
+    {
+        <MudForm @ref="form">
+            @foreach (var category in questionsList.GroupBy(q => q.Category))
+            {
+                <MudExpansionPanel>
+                    <TitleContent>
+                        <div class="d-flex category-header">
+                            <MudText><strong>"@category.Key.GetDisplayName()</strong>"</MudText>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        @foreach (var question in category)
+                        {
+                            <MudText Typo="Typo.h6">@question.Text</MudText>
+
+                            @switch (question.Type)
+                            {
+                                case QuestionType.Text:
+                                    <MudTextField @bind-Value="question.Response.Value" Label="Enter your answer" />
+                                    break;
+
+                                case QuestionType.Check:
+                                    <MudSwitch @bind-Value="question.SelectedBoolean" />
+                                    break;
+
+                                case QuestionType.SelectBox:
+                                    <MudSelect @bind-Value="question.Response.Value" Label="Select an option">
+                                        @foreach (var option in question.Answers)
+                                        {
+                                            <MudSelectItem Value="@option.ID.ToString()">@option.AnswerText</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    break;
+
+                                case QuestionType.Date:
+                                    <MudDatePicker @bind-Date="question.DateResponse" Label="Pick a date" />
+                                    break;
+
+                                case QuestionType.Number:
+                                    <MudNumericField @bind-Value="question.NumericResponse" Label="Enter a number" />
+                                    break;
+                            }
+                        }
+
+                    </ChildContent>
+
+                </MudExpansionPanel>
+            }
+        </MudForm>
+        <MudButton ButtonType="ButtonType.Submit" OnClick="SubmitAnswers" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Disabled="@disabled">Save</MudButton>
+    }
+</MudPaper>
 
 @code {
-    @code {
-        private MudForm form;
-        public Dictionary<string, List<QuestionViewModel>> GroupedQuestionsByCategory { get; set; } = new();
+    private MudForm form;
 
-        [Inject] private IDonorService DonorService { get; set; }
-        [Inject] private IQuestionService QuestionService { get; set; }
+    [Inject] private IDonorService DonorService { get; set; }
+    [Inject] private IQuestionService QuestionService { get; set; }
+    [Parameter] public int DonorId { get; set; }
+    private bool disabled = false;
+    private List<QuestionaireViewModel> questionsList = new();
+    [Parameter] public EventCallback<bool> OnQuestionaireRegistered { get; set; }
 
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        // Load questions based on the DonorId
+        var result = await QuestionService.GetDonorQuestionaire(DonorId);
+        questionsList = result.Result ?? new List<QuestionaireViewModel>();
+    }
+
+    private async Task SubmitAnswers()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
         {
-            // Load and group the questions by category
-            var questions = await LoadQuestionsAsync();
-            GroupQuestionsByCategory(questions);
-        }
-
-        private async Task<IEnumerable<QuestionViewModel>> LoadQuestionsAsync()
-        {
-            // Fetch questions from your database (this is an example)
-            var questions = await QuestionService.GetAllQuestionsAsync();
-
-            if (questions.Success)
-            {
-                if (questions.Result == null || questions.Result.Count() == 0)
-                    return new List<QuestionViewModel>();
-                foreach (var question in questions.Result)
-                {
-                    if (question.Type == QuestionType.SelectBox) // If it's a dropdown question
-                    {
-                        question.Answers = question.Answers;
-                    }
-                }
-
-            }
-
-            return questions.Result;
-        }
-
-        private void GroupQuestionsByCategory(IEnumerable<QuestionViewModel> questions)
-        {
-            GroupedQuestionsByCategory = questions
-                .GroupBy(q => q.Category.ToString())
-                .ToDictionary(g => g.Key, g => g.ToList());
-        }
-
-        private async Task SubmitAnswers()
-        {
-            if (form.IsValid)
-            {
-                // Save the responses for the donor to the Responses table
-                foreach (var categoryGroup in GroupedQuestionsByCategory)
-                {
-                    foreach (var question in categoryGroup.Value)
-                    {
-                        var response = new ResponseViewModel
-                        {
-                            DonorID = currentDonorId, // This will be your current donor's ID
-                            QuestionID = question.ID,
-                            AnswerID = question.SelectedAnswerId, // If it's a dropdown answer
-                            AnswerText = question.AnswerText // If it's a text answer
-                        };
-
-                        // Add the response to your database
-                        _dbContext.Responses.Add(response);
-                    }
-                }
-
-                await _dbContext.SaveChangesAsync();
-            }
+            await DonorService.SubmitAnswers(questionsList);
+            disabled = true;
+            OnQuestionaireRegistered.InvokeAsync(true);
+            // Additional logic after submission (e.g., success message)
         }
     }
 
+    // private void ToggleError()
+    // {
+    //     MyStep.ToggleError(!MyStep.HasError);
+    //     StateHasChanged();
+    // }
+
 }
+

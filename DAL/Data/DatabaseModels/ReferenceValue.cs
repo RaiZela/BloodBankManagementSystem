@@ -9,6 +9,7 @@ public class ReferenceValue : AuditableEntity
 
     [ForeignKey(nameof(Examination.ID))]
     public int ExaminationID { get; set; }
+
     [DeleteBehavior(DeleteBehavior.NoAction)]
     public virtual Examination Examination { get; set; }
 }

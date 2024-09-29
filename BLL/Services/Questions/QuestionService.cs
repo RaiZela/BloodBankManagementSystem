@@ -14,6 +14,7 @@ public interface IQuestionService
     Task<ApiResponse<IEnumerable<AnswerViewModel>>> GetAllAnswersAsync();
     Task<ApiResponse<bool>> UpdateAnswerAsync(AnswerViewModel answer);
     Task<ApiResponse<bool>> DeleteAnswerAsync(int answerId);
+    Task<ApiResponse<List<QuestionaireViewModel>>> GetDonorQuestionaire(int donorID);
 }
 
 public class QuestionService : IQuestionService
@@ -21,11 +22,14 @@ public class QuestionService : IQuestionService
     private readonly IRepository<ApplicationDbContext> _repository;
     private readonly IMapper _mapper;
     private readonly IMessageService _messageService;
+    public delegate void ProcessResponse(QuestionaireViewModel question, int donorID, int questionID);
+
     public QuestionService(IRepository<ApplicationDbContext> repository, IMapper mapper, IMessageService messageService)
     {
         _repository = repository;
         _mapper = mapper;
         _messageService = messageService;
+       
     }
 
     public async Task<ApiResponse<bool>> CreateQuestionAsync(QuestionViewModel question)
@@ -225,6 +229,36 @@ public class QuestionService : IQuestionService
             throw;
         }
 
+    }
+
+    public async Task<ApiResponse<List<QuestionaireViewModel>>> GetDonorQuestionaire(int donorID)
+    {
+        try
+        {
+            ProcessResponse processDelegate = GetResponseObject;
+
+            var questions = await _repository.GetQueryable<Question>(x => !x.IsDeleted)
+                                    .Include(q => q.Answers)
+                                    .ToListAsync() ?? new List<Question>();
+
+            var result = _mapper.Map<List<QuestionaireViewModel>>(questions);
+            result.ForEach(x => processDelegate(x, donorID, x.ID));
+            return ApiResponse<List<QuestionaireViewModel>>.ApiOkResponse(result);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+
+    }
+
+    private void GetResponseObject(QuestionaireViewModel question, int donorId, int questionID)
+    {
+        question.Response = new ResponseViewModel()
+        {
+            DonorID = donorId,
+            QuestionID = questionID
+        };
     }
 }
 

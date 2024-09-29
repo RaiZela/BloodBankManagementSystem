@@ -18,8 +18,9 @@ public class Response : AuditableEntity
     public virtual Question Question { get; set; }
 
     [ForeignKey(nameof(Answer.ID))]
-    public int AnswerID { get; set; }
+    public int? AnswerID { get; set; }
 
     [DeleteBehavior(DeleteBehavior.NoAction)]
-    public virtual Answer Answer { get; set; }
+    public virtual Answer? Answer { get; set; }
+    public string? Value { get; set; }
 }

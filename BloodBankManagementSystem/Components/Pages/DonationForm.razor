@@ -3,23 +3,60 @@
 @attribute [Authorize]
 
 <MyMudStepper @ref="_stepper">
-    <MyMudStep Title="Step 1" @ref="_steps[0]">
-        <DonorRegistration/>
+    <MyMudStep Title="Donor Details" @ref="_steps[0]">
+        <DonorRegistration OnDonorRegistered="HandleDonorRegistered" />
     </MyMudStep>
 
-    <MyMudStep Title="Step 2" @ref="_steps[1]">
-        <MudButton OnClick="() => _stepper.PreviousStep()">Previous</MudButton>
-        <MudButton OnClick="() => _stepper.NextStep()">Next</MudButton>
-        <MudButton OnClick="() => _steps[1].ToggleError(!_steps[1].HasError)">Toggle error</MudButton>
-        <MudButton OnClick="() => _steps[2].ToggleActive(!_steps[2].IsActive)">Toggle next step</MudButton>
+    <MyMudStep Title="Questionnaire" @ref="_steps[1]">
+        @if (isStepCompleted[0])
+        {
+            <DonorQuestionaire DonorId="DonorId" OnQuestionaireRegistered="HandleQuestionaireRegistered" />
+        }
+        @*         <MudButton OnClick="() => _steps[1].ToggleError(!_steps[1].HasError)">Toggle error</MudButton>
+        <MudButton OnClick="() => _steps[2].ToggleActive(!_steps[2].IsActive)">Toggle next step</MudButton> *@
     </MyMudStep>
 
-    <MyMudStep Title="Step 3" @ref="_steps[2]">
-        <MudButton OnClick="() => _stepper.PreviousStep()">Previous</MudButton>
+    <MyMudStep Title="Examinations" @ref="_steps[2]">
+        @if (isStepCompleted[1])
+        {
+            <!-- Add content for Examinations step here -->
+        }
     </MyMudStep>
 </MyMudStepper>
 
 @code {
     private MyMudStepper _stepper = default!;
     private MyMudStep[] _steps = new MyMudStep[3];
+    private int DonorId;
+
+    private bool[] isStepCompleted = new bool[3];
+
+    private void HandleDonorRegistered(int donorId)
+    {
+        DonorId = donorId;
+        isStepCompleted[0] = true;
+        GoToNextStep();
+    }
+
+    private void HandleQuestionaireRegistered(bool done)
+    {
+        isStepCompleted[1] = true;
+        GoToNextStep();
+    }
+
+    private void GoToNextStep()
+    {
+        if (Array.IndexOf(isStepCompleted, true) < _steps.Length - 1)
+        {
+            _stepper.NextStep();
+        }
+    }
+
+    private void GoToPreviousStep()
+    {
+        if (Array.IndexOf(isStepCompleted, true) > 0)
+        {
+            _stepper.PreviousStep();
+        }
+    }
 }

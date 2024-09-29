@@ -8,5 +8,4 @@ public class ReferenceValueViewModel
     public decimal MinValue { get; set; }
     public decimal MaxValue { get; set; }
     public int ExaminationID { get; set; }
-    public virtual ExaminationViewModel Examination { get; set; }
 }

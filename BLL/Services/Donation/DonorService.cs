@@ -1,12 +1,15 @@
-﻿namespace BloodBankManagementSystem.BLL.Services.Donation;
+﻿using static General.Enums;
+
+namespace BloodBankManagementSystem.BLL.Services.Donation;
 
 public interface IDonorService
 {
-    public Task<ApiResponse<bool>> Add(DonorViewModel Donor);
+    public Task<ApiResponse<int>> Add(DonorViewModel Donor);
     public Task<ApiResponse<bool>> Delete(int id);
     public Task<ApiResponse<bool>> Update(DonorViewModel Donor);
     public Task<ApiResponse<DonorViewModel>> Get(int id);
     public Task<ApiResponse<List<DonorViewModel>>> GetAll();
+    public Task<ApiResponse<bool>> SubmitAnswers(List<QuestionaireViewModel> questionaires);
 }
 
 public class DonorService : IDonorService
@@ -22,13 +25,13 @@ public class DonorService : IDonorService
         _mapper = mapper;
         _messageService = message;
     }
-    public async Task<ApiResponse<bool>> Add(DonorViewModel value)
+    public async Task<ApiResponse<int>> Add(DonorViewModel value)
     {
         try
         {
-            var clinic = await _repository.CreateAsync<Donor>(_mapper.Map<Donor>(value));
+            var donor = await _repository.CreateAsync<Donor>(_mapper.Map<Donor>(value));
             await _repository.SaveAsync();
-            return ApiResponse<bool>.ApiOkResponse(true);
+            return ApiResponse<int>.ApiOkResponse(donor.ID);
 
         }
         catch (Exception ex)
@@ -95,5 +98,32 @@ public class DonorService : IDonorService
         {
             throw;
         }
+    }
+    public async Task<ApiResponse<bool>> SubmitAnswers(List<QuestionaireViewModel> questionaires)
+    {
+        try
+        {
+            var responses = _mapper.Map<List<Response>>(questionaires.Select(x => x.Response));
+
+            var donor = await _repository.GetQueryable<Donor>(x => x.ID == responses.First().DonorID)
+                .FirstOrDefaultAsync();
+
+            if (donor == null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            donor.QuestionaireResponses = responses;
+
+            _repository.Update(donor);
+
+            await _repository.SaveAsync();
+
+            return ApiResponse<bool>.ApiOkResponse(true);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+
     }
 }

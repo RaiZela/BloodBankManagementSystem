@@ -9,10 +9,6 @@
 @attribute [Authorize]
 
 <MudStack Spacing="4">
-@*     @if (ShowAlert)
-    {
-        <MudAlert ContentAlignment="HorizontalAlignment.Center" id="Alert">Time to call. Please close me!</MudAlert>
-    } *@
     <EditForm Model="@Donor" OnValidSubmit="OnValidSubmit" FormName="Donor Registration">
         <DataAnnotationsValidator />
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
@@ -67,9 +63,10 @@
                                                Disabled="false"
                                                Placeholder="BirthCity"
                                                Clearable="true">
+                                        <MudSelectItem Value="0" Disabled=true> Select a city</MudSelectItem>
                                         @foreach (var city in Cities)
                                         {
-                                            <MudSelectItem Value="city.ID" >@city.Description</MudSelectItem>
+                                            <MudSelectItem Value="city.ID">@city.Description</MudSelectItem>
                                         }
                                     </MudSelect>
                                 </MudStack>
@@ -77,7 +74,7 @@
                         </MudGrid>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" OnClick="() => RegisterDonor(Donor)" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Next</MudButton>
+                        <MudButton Disabled="@disabled" ButtonType="ButtonType.Submit" OnClick="() => RegisterDonor(Donor)" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
                     </MudCardActions>
                 </MudCard>
 
@@ -85,31 +82,26 @@
         </MudContainer>
     </EditForm>
 
-    <MudStack Row="true" AlignItems="AlignItems.Center">
-        <MudButton OnClick="() => MyStep.ToggleError(!MyStep.HasError)">Toggle error</MudButton>
-    </MudStack>
 
 </MudStack>
 
 @code {
 
     DonorViewModel Donor = new DonorViewModel();
-    [CascadingParameter] public MyMudStepper MyMudStepper { get; set; } = default!;
-    [CascadingParameter] public MyMudStep MyStep { get; set; } = default!;
     [Inject] private IDonorService DonorService { get; set; }
     [Inject] private ICityService CityService { get; set; }
 
     private MudAlert Alert { get; set; }
     private bool ShowAlert { get; set; }
     private List<CityViewModel> Cities { get; set; } = new List<CityViewModel>();
+    [Parameter] public EventCallback<int> OnDonorRegistered { get; set; }
+    private bool disabled = false;
 
     private void OnValidSubmit(EditContext context)
     {
         StateHasChanged();
     }
 
-
-    public int Value = 50;
 
     protected override async Task OnInitializedAsync()
     {
@@ -119,16 +111,11 @@
     }
 
 
-    public void ToggleError()
-    {
-        MyStep.ToggleError(!MyStep.HasError);
-        StateHasChanged();
-    }
-
     public async Task RegisterDonor(DonorViewModel donor)
     {
         var result = await DonorService.Add(donor);
-        MyMudStepper.NextStep();
+        disabled = true;
+        OnDonorRegistered.InvokeAsync(result.Result);
     }
 
 }

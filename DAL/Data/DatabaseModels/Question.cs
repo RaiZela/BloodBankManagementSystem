@@ -8,5 +8,5 @@ public class Question : AuditableEntity
     public QuestionType Type { get; set; }
     public QuestionCategory Category { get; set; }
     [DeleteBehavior(DeleteBehavior.Cascade)]
-    public virtual List<Answer> Answers { get; set; }
+    public virtual List<Answer>? Answers { get; set; }
 }

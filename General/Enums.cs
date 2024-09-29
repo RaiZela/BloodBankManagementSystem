@@ -22,8 +22,8 @@ public class Enums
     {
         [Display(Name = "Text")]
         Text,
-        [Display(Name = "Radiobutton")]
-        Radio,
+        [Display(Name = "Check")]
+        Check,
         [Display(Name = "SelectBox")]
         SelectBox,
         [Display(Name = "Date")]
