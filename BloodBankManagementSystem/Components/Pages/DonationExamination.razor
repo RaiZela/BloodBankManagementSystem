@@ -1,0 +1,111 @@
+﻿ @using BLL.Services.Donation
+@using BloodBankManagementSystem.BLL.Services
+ @using BloodBankManagementSystem.BLL.Services.Questions
+ @using MudBlazor
+ @using Newtonsoft.Json
+ @using Shared.ViewModels
+ @using static General.Enums
+ @using General
+ @rendermode InteractiveServer
+ @using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@page "/donation-examination"
+
+<style>
+    .category-header {
+        background-color: rgba(33, 150, 243, 1);
+        padding: 8px;
+        margin-bottom: 16px;
+        border-radius: 5px;
+        color: white;
+    }
+</style>
+<MudPaper Class="pa-4">
+
+    <MudText Typo="Typo.h6" GutterBottom="true">Examination</MudText>
+
+    @if (ExaminationList.Count == 0)
+    {
+        <MudText Typo="Typo.body1">No examination available.</MudText>
+    }
+    else
+    {
+        <MudForm @ref="form">
+            @foreach (var examination in ExaminationList)
+            {
+                <MudText Typo="Typo.h6" Class="d-flex category-header">@examination.Description</MudText>
+                <MudNumericField T="double"
+                                 @bind-Value="examination.ExaminationResult.ResultValue"
+                                 Variant="Variant.Outlined"
+                                 Label="Result Value"
+                                 Error="@hasFieldError"
+                                 ErrorText="@fieldErrorMessage"
+                                 Immediate="true"
+                                 OnBlur="@(async () => ValidateResultValue(examination.ExaminationResult.ResultValue, examination))" />
+            }
+
+        </MudForm>
+        //<MudButton ButtonType="ButtonType.Submit" OnClick="SubmitAnswers" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Disabled="@disabled">Save</MudButton>
+    }
+</MudPaper>
+
+@code {
+    private MudForm form;
+
+    [Inject] private IDonorService DonorService { get; set; }
+    [Inject] private IExaminationService ExaminationService { get; set; }
+    //[Parameter] public int DonorId { get; set; }
+    private bool disabled = false;
+    private List<DonationExaminationViewModel> ExaminationList = new();
+    //[Parameter] public EventCallback<bool> OnQuestionaireRegistered { get; set; }
+    private bool hasError = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load questions based on the DonorId
+        var result = await ExaminationService.GetDonorFormExaminationsAsync();
+        ExaminationList = result.Result ?? new List<DonationExaminationViewModel>();
+    }
+
+    @code {
+        private bool hasFieldError = false;
+        private string fieldErrorMessage = string.Empty;
+
+        private void ValidateResultValue(double value, DonationExaminationViewModel referenceValue)
+        {
+            if (referenceValue.ReferenceValues == null || !referenceValue.ReferenceValues.Any())
+            {
+                hasFieldError = true;
+                fieldErrorMessage = "Reference values are missing.";
+                return;
+            }
+
+            var minValue = referenceValue.ReferenceValues.First().MinValue;
+            var maxValue = referenceValue.ReferenceValues.First().MaxValue;
+
+            if (value < minValue || value > maxValue)
+            {
+                hasFieldError = true;
+                fieldErrorMessage = $"The value should be between {minValue} and {maxValue}.";
+            }
+            else
+            {
+                hasFieldError = false;
+                fieldErrorMessage = string.Empty;
+            }
+        }
+    }
+
+
+
+    private async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            // Handle successful form submission
+        }
+    }
+}
+

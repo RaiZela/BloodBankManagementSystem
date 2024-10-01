@@ -5,5 +5,5 @@
 [Index(nameof(Code))]
 public class Examination : BasicParameters
 {
-    public virtual List<ReferenceValue> ReferenceValues { get; set; }
+    public virtual List<ReferenceValue>? ReferenceValues { get; set; }
 }

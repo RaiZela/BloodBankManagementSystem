@@ -3,6 +3,7 @@
 @using MudBlazor
 @attribute [Authorize]
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @* <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -74,28 +75,53 @@
 <MudPaper Width="250px" Class="py-3" Elevation="0">
     <MudNavMenu Bordered=true Color="Color.Info">
         <MudText Typo="Typo.h6" Class="px-4">My Application</MudText>
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="fas fa-chart-line">Dashboard</MudNavLink>
         <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Secondary Text</MudText>
         <MudDivider Class="my-2" />
-        <MudNavLink Href="/donation-form" Match="NavLinkMatch.All">Donation Form</MudNavLink>
-        <MudNavLink Href="/donor-questionaire" Match="NavLinkMatch.All">Donor Questionaire</MudNavLink>
-        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="fas fa-chart-line">Dashboard</MudNavLink>
-        <MudNavGroup Title="Settings" Expanded="false" Icon="fas fa-cogs">
+        <MudNavGroup Title="Donations" Expanded="true" Icon="fas fa-hand-holding-heart">
+            <MudNavLink Href="/donation-form" Icon="fas fa-plus" Match="NavLinkMatch.All">Add Donation</MudNavLink>
+        </MudNavGroup>
+@*         <MudNavLink class="nav-link" Href="Account/Manage" Match="NavLinkMatch.All"><span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @userName</MudNavLink> *@
+        <MudNavGroup Title="Settings" Expanded="true" Icon="fas fa-cogs">
             <MudNavLink Href="/clinics" Match="NavLinkMatch.All">Clinics</MudNavLink>
             <MudNavLink Href="/donationSymptoms" Match="NavLinkMatch.All">Donation Symptoms</MudNavLink>
             <MudNavLink Href="/donationTherapies" Match="NavLinkMatch.All">Donation Therapies</MudNavLink>
             <MudNavLink Href="/antibodies" Match="NavLinkMatch.All">Antibodies</MudNavLink>
             <MudNavLink Href="/add-question" Match="NavLinkMatch.All">Questions</MudNavLink>
+            <MudNavLink Href="/add-examination" Match="NavLinkMatch.All">Examinations</MudNavLink>
+            <MudNavLink Href="/units-of-measurement" Match="NavLinkMatch.All">Units Of Measurement</MudNavLink>
         </MudNavGroup>
-        <MudNavLink Href="/users" Icon="fas fa-users">Users</MudNavLink>
-        <MudNavLink Href="/security" Icon="fas fa-user-shield">Security</MudNavLink>
-        <MudNavLink Href="/account/logout" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Logout">Logout</MudNavLink>
+
+
+        <div class="nav-item px-3">
+            <MudNavLink Href="Account/Logout">
+                <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                <button type="submit" class="nav-link">
+                    <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                </button>
+            </MudNavLink>
+        </div>
+
     </MudNavMenu>
 </MudPaper>
 @code {
     private string? currentUrl;
+    private string userName;
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            userName = user.Identity.Name; // Fetches the logged-in user's name
+        }
+        else
+        {
+            userName = "Guest"; // Or any default text for non-authenticated users
+        }
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }

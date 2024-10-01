@@ -1,6 +1,5 @@
 ﻿@page "/add-examination"
 @using BloodBankManagementSystem.BLL.Services
-@using BloodBankManagementSystem.BLL.Services.Questions
 @using MudBlazor
 @using Newtonsoft.Json
 @using Shared.ViewModels
@@ -11,7 +10,7 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<PageTitle>Examinationa</PageTitle>
+<PageTitle>Examination</PageTitle>
 
 <MudDataGrid T="ExaminationViewModel" MultiSelection="true" Items="@Examinations" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
@@ -26,41 +25,92 @@
     <Columns>
         <SelectColumn T="ExaminationViewModel" />
         <PropertyColumn Property="x => x.Code" />
-        <PropertyColumn Property="x => x.Description"/>
-            <PropertyColumn Property="x => x.IsEnabled">
-                <EditTemplate>
-                    <MudSwitch @bind-Value="context.Item.IsEnabled">
-                        </MudSwitch>
-                </EditTemplate>
-            </PropertyColumn>
+        <PropertyColumn Property="x => x.Description" />
+        <PropertyColumn Property="x => x.IsEnabled">
+            <EditTemplate>
+                <MudSwitch @bind-Value="context.Item.IsEnabled">
+                </MudSwitch>
+            </EditTemplate>
+        </PropertyColumn>
 
-            <PropertyColumn Property="x => x.ReferenceValues" Hidden="true">
-                <EditTemplate>
-                    <MudList>
-                        @foreach (var reference in context.Item.ReferenceValues)
-                        {
-                            <MudListItem>
-                                <MudNumericField T="decimal" @bind-Value="reference.MinValue" Label="Minimal Value" />
-                                <MudNumericField T="decimal" @bind-Value="reference.MaxValue" Label="Maximal Value" />
-                            </MudListItem>
-                        }
-                        <MudListItem>
-                            <MudNumericField T="decimal?" @bind-Value="minValue" Label="Minimal Value" />
-                            <MudNumericField T="decimal?" @bind-Value="maxValue" Label="Maximal Value" />
-                            <MudButton OnClick="@(async () => await AddNewReferenceValue(context.Item))">Add Reference Value</MudButton>
-                        </MudListItem>
-                    </MudList>
-                </EditTemplate>
-            </PropertyColumn>
-            <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-end" HeaderClass="d-flex justify-center">
-                <HeaderTemplate>
-                    <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.AddCircle" OnClick="@(()=>_dataGrid.SetEditingItemAsync(new ExaminationViewModel()))" />
-                </HeaderTemplate>
-                <CellTemplate>
-                    <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                    <MudIconButton Size="@Size.Medium" Style="@($"color:{Colors.Red.Accent4}; background:{Colors.Shades.White};")" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(()=>OnDeleteButtonClickedAsync(context.Item))" />
-                </CellTemplate>
-            </TemplateColumn>
+        <PropertyColumn Property="x => x.ReferenceValues" Hidden="true">
+            <EditTemplate>
+                <MudList>
+                    @foreach (var reference in context.Item.ReferenceValues)
+                    {
+                        <MudPaper Class="pa-4 mt-4">
+                            <MudText Typo="Typo.h6">Reference Values</MudText>
+                            <MudGrid>
+                                <MudItem xs="6">
+                                    <MudNumericField T="double" @bind-Value="reference.MinValue" Label="Minimal Value" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudNumericField T="double" @bind-Value="reference.MaxValue" Label="Maximal Value" />
+                                </MudItem>
+                                <MudItem sm="6">
+                                    <MudSelect @bind-Value="reference.UnitOfMeasurementID"
+                                               Variant="Variant.Text"
+                                               Label="Unit Of Measurement"
+                                               Disabled="false"
+                                               Placeholder="Unit Of Measurement"
+                                               Clearable="true">
+                                        <MudSelectItem Value="0" Disabled=true> Select a unit </MudSelectItem>
+                                        @foreach (var unit in UnitsOfMeasurement)
+                                        {
+                                            <MudSelectItem Value="unit.ID">@unit.Description</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <MudItem xs="6">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => RemoveReferenceValue(reference, context.Item))">Delete</MudButton>
+                                    <MudSwitch @bind-Value="reference.IsEnabled"></MudSwitch>
+                                </MudItem>
+
+                            </MudGrid>
+                        </MudPaper>
+                    }
+                    <MudPaper Class="pa-4 mt-4">
+                        <MudText Typo="Typo.h6">Add New Reference Value</MudText>
+                        <MudGrid>
+                            <MudItem xs="6">
+                                <MudNumericField T="double" @bind-Value="minValue" Label="Minimal Value" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudNumericField T="double" @bind-Value="maxValue" Label="Maximal Value" />
+                            </MudItem>
+                            <MudItem sm="6">
+                                <MudSelect @bind-Value="unitId"
+                                           Variant="Variant.Text"
+                                           Label="Unit Of Measurement"
+                                           Disabled="false"
+                                           Placeholder="Unit Of Measurement"
+                                           Clearable="true">
+                                    <MudSelectItem Value="0" Disabled=true> Select a unit </MudSelectItem>
+                                    @foreach (var unit in UnitsOfMeasurement)
+                                    {
+                                        <MudSelectItem Value="unit.ID">@unit.Description</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudSwitch @bind-Value="@isEnabled"></MudSwitch>
+                            </MudItem>
+                        </MudGrid>
+                        <MudButton OnClick="@(async () => await AddNewReferenceValue(context.Item))" Variant="Variant.Text" Color="Color.Default">Add Reference Value</MudButton>
+                    </MudPaper>
+                </MudList>
+            </EditTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-end" HeaderClass="d-flex justify-center">
+            <HeaderTemplate>
+                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.AddCircle" OnClick="@(()=>_dataGrid.SetEditingItemAsync(new ExaminationViewModel()))" />
+            </HeaderTemplate>
+            <CellTemplate>
+                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudIconButton Size="@Size.Medium" Style="@($"color :{Colors.Red.Accent4}; background :{Colors.Shades.White};")" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(()=>OnDeleteButtonClickedAsync(context.Item))" />
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <PagerContent>
         <MudDataGridPager T="ExaminationViewModel" />
@@ -79,16 +129,20 @@
 
 @code {
     private IEnumerable<ExaminationViewModel> Examinations = new List<ExaminationViewModel>();
+    private IEnumerable<UnitOfMeasurementViewModel> UnitsOfMeasurement = new List<UnitOfMeasurementViewModel>();
     private string _searchString = "";
     private List<string> _events = new();
     private bool _readOnly;
     private MudMessageBox _mudMessageBox;
     private string _state = "Message box hasn't been opened yet";
     private MudDataGrid<ExaminationViewModel> _dataGrid = new MudDataGrid<ExaminationViewModel>();
-    private decimal? minValue;
-    private decimal? maxValue;
+    private double minValue = 0;
+    private double maxValue = 0;
+    private int unitId = 0;
+    private bool isEnabled = false;
 
     [Inject] private IExaminationService ExaminationService { get; set; }
+    [Inject] private IUnitOfMeasurementService UnitOfMeasurementService { get; set; }
 
     private Func<ExaminationViewModel, bool> _quickFilter => x =>
     {
@@ -158,21 +212,30 @@
     private async Task GetUpdatedGrid()
     {
         var result = await ExaminationService.GetAllExaminationsAsync();
+        var units = await UnitOfMeasurementService.GetAll();
         Examinations = (List<ExaminationViewModel>)(result.Result == null ? Examinations : result.Result);
+        UnitsOfMeasurement = (List<UnitOfMeasurementViewModel>)(units.Result == null ? UnitsOfMeasurement : units.Result);
     }
 
     private async Task AddNewReferenceValue(ExaminationViewModel examination)
     {
-        if (minValue != null && maxValue != null)
+        if (minValue != 0 && maxValue != 0 && unitId != 0)
         {
             examination.ReferenceValues.Add(new ReferenceValueViewModel
                 {
                     ExaminationID = examination.ID,
-                    MinValue = decimal.MinValue,
-                    MaxValue = decimal.MaxValue
+                    MinValue = minValue,
+                    MaxValue = maxValue,
+                    UnitOfMeasurementID = unitId
                 });
             minValue = 0;
             maxValue = 0;
+            unitId = 0;
         }
     }
+    private void RemoveReferenceValue(ReferenceValueViewModel reference, ExaminationViewModel examination)
+    {
+        examination.ReferenceValues.Remove(reference);
+    }
+
 }

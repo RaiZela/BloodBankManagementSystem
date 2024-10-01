@@ -8,9 +8,10 @@ public interface IExaminationService
     #region Examinations
     Task<ApiResponse<bool>> CreateExaminationAsync(ExaminationViewModel examination);
     Task<ApiResponse<ExaminationViewModel>> GetExaminationByIdAsync(int id);
-    Task<ApiResponse<IEnumerable<ExaminationViewModel>>> GetAllExaminationsAsync();
+    Task<ApiResponse<List<ExaminationViewModel>>> GetAllExaminationsAsync();
     Task<ApiResponse<bool>> UpdateExaminationAsync(ExaminationViewModel examination);
     Task<ApiResponse<bool>> DeleteExaminationAsync(int examination);
+    Task<ApiResponse<List<DonationExaminationViewModel>>> GetDonorFormExaminationsAsync();
     #endregion Examinations
 
     #region ReferenceValues
@@ -26,6 +27,7 @@ public class ExaminationService : IExaminationService
     private readonly IRepository<ApplicationDbContext> _repository;
     private readonly IMapper _mapper;
     private readonly IMessageService _messageService;
+
     public ExaminationService(IRepository<ApplicationDbContext> repository, IMapper mapper, IMessageService messageService)
     {
         _repository = repository;
@@ -65,16 +67,30 @@ public class ExaminationService : IExaminationService
         }
     }
 
-    public async Task<ApiResponse<IEnumerable<ExaminationViewModel>>> GetAllExaminationsAsync()
+    public async Task<ApiResponse<List<ExaminationViewModel>>> GetAllExaminationsAsync()
     {
         try
         {
-            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x=>x.ReferenceValues).ToListAsync();
-            return ApiResponse<IEnumerable<ExaminationViewModel>>.ApiOkResponse(_mapper.Map<IEnumerable<ExaminationViewModel>>(examinations));
+            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x=>x.ReferenceValues.Where(x=>!x.IsDeleted)).ToListAsync();
+            return ApiResponse<List<ExaminationViewModel>>.ApiOkResponse(_mapper.Map<List<ExaminationViewModel>>(examinations));
         }
         catch (Exception ex)
         {
-            return ApiResponse<IEnumerable<ExaminationViewModel>>.ApiInternalServerErrorResponse(ex.Message);
+            return ApiResponse<List<ExaminationViewModel>>.ApiInternalServerErrorResponse(ex.Message);
+        }
+    }
+    public async Task<ApiResponse<List<DonationExaminationViewModel>>> GetDonorFormExaminationsAsync()
+    {
+        try
+        {
+            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x => x.ReferenceValues.Where(x => !x.IsDeleted)).ToListAsync();
+
+            var result = _mapper.Map<List<DonationExaminationViewModel>>(examinations);
+            return ApiResponse<List<DonationExaminationViewModel>>.ApiOkResponse(result);
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<List<DonationExaminationViewModel>>.ApiInternalServerErrorResponse(ex.Message);
         }
     }
 
@@ -82,11 +98,32 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var record = await _repository.GetQueryable<Examination>(x => x.ID == examination.ID).FirstOrDefaultAsync();
+            var record = await _repository.GetQueryable<Examination>(x => x.ID == examination.ID).Include(x=>x.ReferenceValues).FirstOrDefaultAsync();
             if (record == null)
                 return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 
-            _repository.Update(_mapper.Map(examination, record));
+            List<ReferenceValue> referenceValues = record.ReferenceValues == null ? new List<ReferenceValue>() : record.ReferenceValues;
+
+            foreach (var updated in examination.ReferenceValues)
+            {
+                var existing = referenceValues.FirstOrDefault(x => x.ID == updated.ID);
+
+                if (existing!= null && existing.ID != 0)
+                {
+                    _mapper.Map(updated, existing);
+                }
+                else
+                {
+                    referenceValues.Add(_mapper.Map<ReferenceValue>(updated));
+                }
+            }
+
+            referenceValues.RemoveAll(a => !examination.ReferenceValues.Any(x => x.ID == a.ID));
+
+            _mapper.Map(examination, record);
+            record.ReferenceValues = referenceValues;
+
+            _repository.Update(record);
             await _repository.SaveAsync();
             return ApiResponse<bool>.ApiOkResponse(true);
         }

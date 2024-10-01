@@ -4,6 +4,7 @@ using BloodBankManagementSystem.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240930200122_ReferenceValue_IsEnabled")]
+    partial class ReferenceValue_IsEnabled
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,14 +144,14 @@ namespace DAL.Migrations
                         {
                             Id = "02174cf0–9412–4cfe - afbf - 59f706d72cf6",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "ce39f3d7-8754-4b1e-910c-6998beda596f",
+                            ConcurrencyStamp = "7fbe478a-9ebd-4923-93b3-af9087cf794c",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedUserName = "RAIZELA@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGD+LoUNSVNyJDOO9jpHAS43fMBkRntH8seDcujT9QlNXfeotF/0fnamSF7JoFNO6g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBUOrTTBNY0cuutw1yglN+QG/tdmOMPFIYMABotOXkEeXv8nRclJRyPmdu0N7Yq5Cw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "2541b007-55fd-463a-8dec-1c005a38a6fc",
+                            SecurityStamp = "4fe8d9dd-d139-4e3d-abe8-4df4c48fbf34",
                             Status = 0,
                             TwoFactorEnabled = false,
                             UserName = "raizela@gmail.com"
@@ -1703,14 +1706,9 @@ namespace DAL.Migrations
                     b.Property<double>("MinValue")
                         .HasColumnType("float");
 
-                    b.Property<int>("UnitOfMeasurementID")
-                        .HasColumnType("int");
-
                     b.HasKey("ID");
 
                     b.HasIndex("ExaminationID");
-
-                    b.HasIndex("UnitOfMeasurementID");
 
                     b.ToTable("ReferenceValue");
                 });
@@ -2653,18 +2651,10 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Data.DatabaseModels.Examination", "Examination")
                         .WithMany("ReferenceValues")
                         .HasForeignKey("ExaminationID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DAL.Data.DatabaseModels.UnitOfMeasurement", "UnitOfMeasurement")
-                        .WithMany()
-                        .HasForeignKey("UnitOfMeasurementID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Examination");
-
-                    b.Navigation("UnitOfMeasurement");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Response", b =>
