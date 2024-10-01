@@ -9,6 +9,7 @@ public interface ISuspensionReasonService
     public Task<ApiResponse<bool>> Update(SuspensionReasonViewModel clinicsVm);
     public Task<ApiResponse<SuspensionReasonViewModel>> Get(int id);
     public Task<ApiResponse<List<SuspensionReasonViewModel>>> GetAll();
+    Task<ApiResponse<List<SuspensionReasonViewModel>>> GetAllEnabled();
 
 }
 
@@ -77,6 +78,19 @@ public class SuspensionReasonService : ISuspensionReasonService
         try
         {
             var response = await _repository.GetQueryable<SuspensionReason>(x => !x.IsDeleted).ToListAsync();
+            return ApiResponse<List<SuspensionReasonViewModel>>.ApiOkResponse(_mapper.Map<List<SuspensionReasonViewModel>>(response));
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+
+    public async Task<ApiResponse<List<SuspensionReasonViewModel>>> GetAllEnabled()
+    {
+        try
+        {
+            var response = await _repository.GetQueryable<SuspensionReason>(x => !x.IsDeleted && x.IsEnabled).ToListAsync();
             return ApiResponse<List<SuspensionReasonViewModel>>.ApiOkResponse(_mapper.Map<List<SuspensionReasonViewModel>>(response));
         }
         catch (Exception ex)

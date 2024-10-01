@@ -44,11 +44,11 @@ public class DonorViewModel
 
 public class FullDonorViewModel : DonorViewModel
 {
-    public List<DonationViewModel> Donations { get; set; } = new();
+    public List<DonationViewModel> Donations { get; set; }
     public CityViewModel City { get; set; } 
-    public List<ResponseViewModel> QuestionaireResponses { get; set; } = new();
-    public List<SuspendedDonorsViewModel> SuspendedDonors { get; set; } = new();
-    public List<DonationExaminationViewModel> Examinations { get; set; } = new();
+    public List<ResponseViewModel> QuestionaireResponses { get; set; }
+    public List<SuspendedDonorsViewModel> SuspendedDonors { get; set; } 
+    public List<DonationExaminationViewModel> Examinations { get; set; }
 }
 
 

@@ -169,19 +169,29 @@ public class DonorService : IDonorService
 
     public async Task<List<FullDonorViewModel>> GetDonorsWithDetailsAsync()
     {
-        var donors = await _repository.GetQueryable<Donor>(x=>!x.IsDeleted)
-            .Include(d => d.City)
-            .Include(d => d.Donations)
-            .Include(d => d.QuestionaireResponses)
-                 .ThenInclude(x => x.Question)
-            .Include(d => d.SuspendedDonors)
-                .ThenInclude(sd => sd.Reason).ThenInclude(x=>x.DurationUom)
-            .Include(x => x.ExaminationResults)
-                .ThenInclude(x => x.Examination)
-                .OrderByDescending(x=>x.CreatedDate)
-            .ToListAsync();
+        try
+        {
+            var donors = await _repository.GetQueryable<Donor>(x => !x.IsDeleted)
+    .Include(d => d.City)
+    .Include(d => d.Donations)
+    .Include(d => d.QuestionaireResponses)
+         .ThenInclude(x => x.Question)
+    .Include(d => d.SuspendedDonors)
+        .ThenInclude(sd => sd.Reason)
+        .ThenInclude(x => x.DurationUom)
+    .Include(x => x.ExaminationResults)
+        .ThenInclude(x => x.Examination)
+        .OrderByDescending(x => x.CreatedDate)
+    .ToListAsync();
 
-        return _mapper.Map<List<FullDonorViewModel>>(donors);
+            return _mapper.Map<List<FullDonorViewModel>>(donors);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+
     }
 
 }

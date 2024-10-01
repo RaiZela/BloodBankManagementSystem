@@ -20,7 +20,9 @@ public class MapProfile : AutoMapper.Profile
         CreateMap<Reaction, ReactionViewModel>().ReverseMap();
         CreateMap<SuspensionReason, SuspensionReasonViewModel>().ReverseMap();
         CreateMap<SuspensionReason, SuspensionReasonShowViewModel>()
-            .ForMember(x=>x.Duration, dest=>dest.MapFrom(x=>x.Duration.ToString() ?? string.Empty +""+ x.DurationUom.Description ?? string.Empty))
+           .ForMember(x => x.Duration,
+           dest => dest.MapFrom(x => x.Duration.ToString() + " " +
+                                     (x.Duration > 1 ? x.DurationUom.Description + "s" : x.DurationUom.Description)))
             .ReverseMap();
 
         CreateMap<PolicyViewModel, Policy>().ReverseMap();

@@ -55,8 +55,7 @@
 
     async Task DeclineDonation()
     {
-        // Show the dropdown for the reason
-        var reasons = await SuspensionReasonService.GetAll();
+        var reasons = await SuspensionReasonService.GetAllEnabled();
         SuspensionReasons = reasons.Result ?? SuspensionReasons;
         ShowReasonDropdown = true;
 
@@ -64,10 +63,8 @@
 
     async Task SubmitReason()
     {
-        // Handle reason submission, close the dialog
         if (SelectedReason != 0)
         {
-            // Handle the selected reason for not donating
             await DonorService.SuspendDonor(DonorID, SelectedReason);
             MudDialog.Close(DialogResult.Ok(SelectedReason));
         }
