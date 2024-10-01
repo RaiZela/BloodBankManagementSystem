@@ -78,7 +78,9 @@ public class Enums
 
     public enum SuspensionType
     {
+        [Display(Name = "Permanent")]
         Permanent,
+        [Display(Name = "Temporary")]
         Temporary
     }
 

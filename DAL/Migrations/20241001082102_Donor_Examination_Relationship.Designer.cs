@@ -4,6 +4,7 @@ using BloodBankManagementSystem.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241001082102_Donor_Examination_Relationship")]
+    partial class Donor_Examination_Relationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,7 +66,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("QuestionID");
 
-                    b.ToTable("Answer", (string)null);
+                    b.ToTable("Answer");
                 });
 
             modelBuilder.Entity("BloodBankManagementSystem.DAL.ApplicationUser", b =>
@@ -141,14 +144,14 @@ namespace DAL.Migrations
                         {
                             Id = "02174cf0–9412–4cfe - afbf - 59f706d72cf6",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1fa38fbf-f15d-4938-a4d1-b6380896e584",
+                            ConcurrencyStamp = "beb38b80-2fd6-499e-987b-e289f7976717",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedUserName = "RAIZELA@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKv3l/Sqe6Z1iJYH+NE9sdVzxPsFrogdgoCBDBsOgeVEas2oJ2e4UNVHc6f9UPotfA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEgPf0yLZ1IU17QaT7B754sFKtWmuJBQge22hEPDH5Dr2+BHttttO9jZ4YfjRsDKZQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "f15e8d82-2b52-4cf0-9111-d091a1dbc27b",
+                            SecurityStamp = "1329226e-f9f9-4885-96fe-5c2f3dbcdc08",
                             Status = 0,
                             TwoFactorEnabled = false,
                             UserName = "raizela@gmail.com"
@@ -201,7 +204,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Antibody", (string)null);
+                    b.ToTable("Antibody");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.BagLot", b =>
@@ -266,7 +269,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("BagTypeId");
 
-                    b.ToTable("BagLot", (string)null);
+                    b.ToTable("BagLot");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.BagManufacturer", b =>
@@ -306,7 +309,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("BagManufacturer", (string)null);
+                    b.ToTable("BagManufacturer");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.BagType", b =>
@@ -346,7 +349,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("BagType", (string)null);
+                    b.ToTable("BagType");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Bank", b =>
@@ -400,7 +403,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Type");
 
-                    b.ToTable("Bank", (string)null);
+                    b.ToTable("Bank");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.City", b =>
@@ -449,7 +452,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("City", (string)null);
+                    b.ToTable("City");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Clinic", b =>
@@ -498,7 +501,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Clinic", (string)null);
+                    b.ToTable("Clinic");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Component", b =>
@@ -555,7 +558,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("UnitsOfMeasurementID");
 
-                    b.ToTable("Component", (string)null);
+                    b.ToTable("Component");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.ComponentPreparation", b =>
@@ -614,7 +617,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ProcessID");
 
-                    b.ToTable("ComponentPreparation", (string)null);
+                    b.ToTable("ComponentPreparation");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.ComponentPreparationMethod", b =>
@@ -654,7 +657,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ComponentPreparationMethods", (string)null);
+                    b.ToTable("ComponentPreparationMethods");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.ComponentStorageSystem", b =>
@@ -725,7 +728,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("UnitsOfMeasurementID");
 
-                    b.ToTable("ComponentStorageSystem", (string)null);
+                    b.ToTable("ComponentStorageSystem");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.DestroyedUnit", b =>
@@ -786,7 +789,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("DonationID");
 
-                    b.ToTable("DestroyedUnit", (string)null);
+                    b.ToTable("DestroyedUnit");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.DestructionReason", b =>
@@ -833,7 +836,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("DestructionReasons", (string)null);
+                    b.ToTable("DestructionReasons");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Donation", b =>
@@ -908,7 +911,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("VolumeUomID");
 
-                    b.ToTable("Donation", (string)null);
+                    b.ToTable("Donation");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.DonationSymptom", b =>
@@ -957,7 +960,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("DonationSymptom", (string)null);
+                    b.ToTable("DonationSymptom");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.DonationTherapy", b =>
@@ -1006,7 +1009,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("DonationTherapy", (string)null);
+                    b.ToTable("DonationTherapy");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.DonationType", b =>
@@ -1055,7 +1058,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("DonationType", (string)null);
+                    b.ToTable("DonationType");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Donor", b =>
@@ -1128,7 +1131,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("CityID");
 
-                    b.ToTable("Donor", (string)null);
+                    b.ToTable("Donor");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Equipment", b =>
@@ -1177,7 +1180,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Equipment", (string)null);
+                    b.ToTable("Equipment");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Examination", b =>
@@ -1226,7 +1229,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Examination", (string)null);
+                    b.ToTable("Examination");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.ExaminationResult", b =>
@@ -1250,7 +1253,7 @@ namespace DAL.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DonationID")
+                    b.Property<int>("DonationID")
                         .HasColumnType("int");
 
                     b.Property<int>("DonorID")
@@ -1280,7 +1283,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ExaminationID");
 
-                    b.ToTable("ExaminationResult", (string)null);
+                    b.ToTable("ExaminationResult");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.FractionedUnit", b =>
@@ -1339,7 +1342,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("DonationID");
 
-                    b.ToTable("FractionedUnit", (string)null);
+                    b.ToTable("FractionedUnit");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.PooledUnit", b =>
@@ -1403,7 +1406,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("DonationID");
 
-                    b.ToTable("PooledUnit", (string)null);
+                    b.ToTable("PooledUnit");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Problem", b =>
@@ -1452,7 +1455,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Problem", (string)null);
+                    b.ToTable("Problem");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Process", b =>
@@ -1501,7 +1504,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Process", (string)null);
+                    b.ToTable("Process");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.ProcessDetail", b =>
@@ -1567,7 +1570,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("VolumeUomId");
 
-                    b.ToTable("ProcessDetail", (string)null);
+                    b.ToTable("ProcessDetail");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Question", b =>
@@ -1613,7 +1616,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Question", (string)null);
+                    b.ToTable("Question");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Reaction", b =>
@@ -1662,7 +1665,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("Reaction", (string)null);
+                    b.ToTable("Reaction");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.ReferenceValue", b =>
@@ -1717,7 +1720,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("UnitOfMeasurementID");
 
-                    b.ToTable("ReferenceValue", (string)null);
+                    b.ToTable("ReferenceValue");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Response", b =>
@@ -1771,7 +1774,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("QuestionID");
 
-                    b.ToTable("Response", (string)null);
+                    b.ToTable("Response");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.StorageSystem", b =>
@@ -1811,7 +1814,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("StorageSystem", (string)null);
+                    b.ToTable("StorageSystem");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.SuspendedDonors", b =>
@@ -1857,7 +1860,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ReasonID");
 
-                    b.ToTable("SuspendedDonors", (string)null);
+                    b.ToTable("SuspendedDonors");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.SuspensionReason", b =>
@@ -1892,10 +1895,10 @@ namespace DAL.Migrations
                     b.Property<int?>("DonorID")
                         .HasColumnType("int");
 
-                    b.Property<double?>("Duration")
+                    b.Property<double>("Duration")
                         .HasColumnType("float");
 
-                    b.Property<int?>("DurationUomID")
+                    b.Property<int>("DurationUomID")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -1922,7 +1925,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("DurationUomID");
 
-                    b.ToTable("SuspensionReason", (string)null);
+                    b.ToTable("SuspensionReason");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.Unit", b =>
@@ -1986,7 +1989,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("FractionedUnitID");
 
-                    b.ToTable("Unit", (string)null);
+                    b.ToTable("Unit");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.UnitOfMeasurement", b =>
@@ -2035,7 +2038,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("Code");
 
-                    b.ToTable("UnitOfMeasurement", (string)null);
+                    b.ToTable("UnitOfMeasurement");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.User.Policy", b =>
@@ -2080,7 +2083,7 @@ namespace DAL.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Policy", (string)null);
+                    b.ToTable("Policy");
                 });
 
             modelBuilder.Entity("DAL.Data.DatabaseModels.User.UserPolicy", b =>
@@ -2131,7 +2134,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("PolicyId");
 
-                    b.ToTable("UserPolicies", (string)null);
+                    b.ToTable("UserPolicies");
                 });
 
             modelBuilder.Entity("DAL.Data.LogEntry", b =>
@@ -2171,7 +2174,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LogEntries", (string)null);
+                    b.ToTable("LogEntries");
                 });
 
             modelBuilder.Entity("DonationDonationSymptom", b =>
@@ -2186,7 +2189,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("SymptomsID");
 
-                    b.ToTable("DonationDonationSymptom", (string)null);
+                    b.ToTable("DonationDonationSymptom");
                 });
 
             modelBuilder.Entity("DonationDonationTherapy", b =>
@@ -2201,7 +2204,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("TherapiesID");
 
-                    b.ToTable("DonationDonationTherapy", (string)null);
+                    b.ToTable("DonationDonationTherapy");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -2558,7 +2561,8 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Data.DatabaseModels.Donation", "Donation")
                         .WithMany("ExaminationResults")
                         .HasForeignKey("DonationID")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("DAL.Data.DatabaseModels.Donor", "Donor")
                         .WithMany()
@@ -2733,7 +2737,8 @@ namespace DAL.Migrations
                     b.HasOne("DAL.Data.DatabaseModels.UnitOfMeasurement", "DurationUom")
                         .WithMany()
                         .HasForeignKey("DurationUomID")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("DurationUom");
                 });

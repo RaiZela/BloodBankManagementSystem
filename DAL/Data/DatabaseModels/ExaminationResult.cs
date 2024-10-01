@@ -13,8 +13,13 @@ public class ExaminationResult : AuditableEntity
     public double ResultValue { get; set; }
 
     [ForeignKey(nameof(Donation.ID))]
-    public int DonationID { get; set; }
+    public int? DonationID { get; set; }
 
     [DeleteBehavior(DeleteBehavior.NoAction)]
-    public virtual Donation Donation { get; set; }
+    public virtual Donation? Donation { get; set; }
+
+    [ForeignKey(nameof(Donor.ID))]
+    public int DonorID { get; set; }
+    [DeleteBehavior(DeleteBehavior.NoAction)]
+    public virtual Donor Donor { get; set; }
 }

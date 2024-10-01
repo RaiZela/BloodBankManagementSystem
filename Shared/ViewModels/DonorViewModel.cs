@@ -42,6 +42,15 @@ public class DonorViewModel
     public bool IsSuspended { get; set; } = false;
 }
 
+public class FullDonorViewModel : DonorViewModel
+{
+    public List<DonationViewModel> Donations { get; set; } = new();
+    public CityViewModel City { get; set; } 
+    public List<ResponseViewModel> QuestionaireResponses { get; set; } = new();
+    public List<SuspendedDonorsViewModel> SuspendedDonors { get; set; } = new();
+    public List<DonationExaminationViewModel> Examinations { get; set; } = new();
+}
+
 
 public class AlphanumericStringAttribute : ValidationAttribute
 {

@@ -13,8 +13,10 @@ public class ResponseViewModel
 {
     public int DonorID { get; set; }
     public int QuestionID { get; set; }
+    public QuestionViewModel? Question { get; set; }
     public int? AnswerID { get; set; }
-    public string Value { get; set; }
+    public AnswerViewModel? Answer { get; set; }
+    public string? Value { get; set; }
     public QuestionType QuestionType { get; set; }
 
 

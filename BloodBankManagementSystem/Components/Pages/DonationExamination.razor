@@ -9,7 +9,6 @@
  @rendermode InteractiveServer
  @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
-@page "/donation-examination"
 
 <style>
     .category-header {
@@ -30,82 +29,92 @@
     }
     else
     {
-        <MudForm @ref="form">
+        <MudGrid>
             @foreach (var examination in ExaminationList)
             {
-                <MudText Typo="Typo.h6" Class="d-flex category-header">@examination.Description</MudText>
-                <MudNumericField T="double"
-                                 @bind-Value="examination.ExaminationResult.ResultValue"
-                                 Variant="Variant.Outlined"
-                                 Label="Result Value"
-                                 Error="@hasFieldError"
-                                 ErrorText="@fieldErrorMessage"
-                                 Immediate="true"
-                                 OnBlur="@(async () => ValidateResultValue(examination.ExaminationResult.ResultValue, examination))" />
-            }
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="d-flex category-header">@examination.Description</MudText>
+                </MudItem>
 
-        </MudForm>
-        //<MudButton ButtonType="ButtonType.Submit" OnClick="SubmitAnswers" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Disabled="@disabled">Save</MudButton>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2">Reference Values:</MudText>
+                </MudItem>
+
+                @foreach (var reference in examination.ReferenceValues)
+                {
+                    <MudItem xs="6">
+                        <MudText>
+                            @($"{reference.MinValue} - {reference.MaxValue} {UnitsOfMeasurement.FirstOrDefault(u => u.ID == reference.UnitOfMeasurementID)?.Description}")
+                        </MudText>
+                    </MudItem>
+                }
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2">Examination Result:</MudText>
+                </MudItem>
+
+                <MudItem xs="6">
+                    <MudNumericField T="double"
+                                     @bind-Value="examination.ExaminationResult.ResultValue"
+                                     Label="Result Value"
+                                     Variant="Variant.Outlined"
+                                     Immediate="true"
+                                     Class="mb-2"
+                                     Error="@(!IsWithinRange(examination.ExaminationResult.ResultValue, examination.ReferenceValues.First().MinValue, examination.ReferenceValues.First().MaxValue))"
+                                     ErrorText="Value is out of the valid range!" />
+                </MudItem>
+            }
+        </MudGrid>
+        <MudButton OnClick="SaveExaminationResults" Disabled="disabled" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
     }
+
+   
+
+
 </MudPaper>
 
 @code {
-    private MudForm form;
-
     [Inject] private IDonorService DonorService { get; set; }
     [Inject] private IExaminationService ExaminationService { get; set; }
-    //[Parameter] public int DonorId { get; set; }
+    [Inject] private IUnitOfMeasurementService UnitOfMeasurementService { get; set; }
+    [Parameter] public int DonorId { get; set; }
+    [Parameter] public EventCallback<bool> OnExaminationRegistered { get; set; }
     private bool disabled = false;
     private List<DonationExaminationViewModel> ExaminationList = new();
-    //[Parameter] public EventCallback<bool> OnQuestionaireRegistered { get; set; }
-    private bool hasError = false;
-    private string errorMessage = string.Empty;
-
+    private List<UnitOfMeasurementViewModel> UnitsOfMeasurement = new();
     protected override async Task OnInitializedAsync()
     {
         // Load questions based on the DonorId
         var result = await ExaminationService.GetDonorFormExaminationsAsync();
         ExaminationList = result.Result ?? new List<DonationExaminationViewModel>();
-    }
-
-    @code {
-        private bool hasFieldError = false;
-        private string fieldErrorMessage = string.Empty;
-
-        private void ValidateResultValue(double value, DonationExaminationViewModel referenceValue)
-        {
-            if (referenceValue.ReferenceValues == null || !referenceValue.ReferenceValues.Any())
-            {
-                hasFieldError = true;
-                fieldErrorMessage = "Reference values are missing.";
-                return;
-            }
-
-            var minValue = referenceValue.ReferenceValues.First().MinValue;
-            var maxValue = referenceValue.ReferenceValues.First().MaxValue;
-
-            if (value < minValue || value > maxValue)
-            {
-                hasFieldError = true;
-                fieldErrorMessage = $"The value should be between {minValue} and {maxValue}.";
-            }
-            else
-            {
-                hasFieldError = false;
-                fieldErrorMessage = string.Empty;
-            }
-        }
+        var units = await UnitOfMeasurementService.GetAll();
+        UnitsOfMeasurement = units.Result ?? UnitsOfMeasurement;
     }
 
 
-
-    private async Task Submit()
+    private bool IsWithinRange(double value, double minValue, double maxValue)
     {
-        await form.Validate();
-        if (form.IsValid)
-        {
-            // Handle successful form submission
-        }
+        if (value != 0)
+            return value >= minValue && value <= maxValue;
+
+        return true;
+    }
+
+
+    private async Task SaveExaminationResults()
+    {
+        var resultsToSave = ExaminationList.Select(examination => new ExaminationResultViewModel
+            {
+                ExaminationID = examination.ID,
+                ResultValue = examination.ExaminationResult.ResultValue,
+                DonorID = DonorId
+
+            }).ToList();
+
+        await ExaminationService.SaveDonorExaminationsAsync(resultsToSave);
+
+        disabled = true;
+        OnExaminationRegistered.InvokeAsync(true);
     }
 }
 

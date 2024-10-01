@@ -19,12 +19,18 @@ public class MapProfile : AutoMapper.Profile
         CreateMap<Problem, ProblemViewModel>().ReverseMap();
         CreateMap<Reaction, ReactionViewModel>().ReverseMap();
         CreateMap<SuspensionReason, SuspensionReasonViewModel>().ReverseMap();
+        CreateMap<SuspensionReason, SuspensionReasonShowViewModel>()
+            .ForMember(x=>x.Duration, dest=>dest.MapFrom(x=>x.Duration.ToString() ?? string.Empty +""+ x.DurationUom.Description ?? string.Empty))
+            .ReverseMap();
 
         CreateMap<PolicyViewModel, Policy>().ReverseMap();
 
 
         CreateMap<Donor, DonorViewModel>().ReverseMap();
+        CreateMap<Donor, FullDonorViewModel>().ReverseMap();
+        CreateMap<SuspendedDonors, SuspendedDonorsViewModel>().ReverseMap();
         CreateMap<Donation, DonationViewModel>().ReverseMap();
+
 
 
         CreateMap<Question, QuestionViewModel>()
@@ -56,5 +62,7 @@ public class MapProfile : AutoMapper.Profile
         CreateMap<Examination, DonationExaminationViewModel>().ReverseMap();
 
         CreateMap<UnitOfMeasurement, UnitOfMeasurementViewModel>().ReverseMap();
+
+        CreateMap<ExaminationResultViewModel, ExaminationResult>().ReverseMap();
     }
 }

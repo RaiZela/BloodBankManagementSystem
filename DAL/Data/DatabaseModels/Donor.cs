@@ -22,6 +22,7 @@ public class Donor : AuditableEntity
     public string Email { get; set; }
     public bool IsSuspended { get; set; }
     public virtual List<Donation> Donations { get; set; }
-    public virtual List<SuspensionReason> SuspensionReasons { get; set; }
+    public virtual List<SuspendedDonors> SuspendedDonors { get; set; }
     public List<Response> QuestionaireResponses { get; set; }
+    public virtual List<ExaminationResult> ExaminationResults { get; set; }
 }

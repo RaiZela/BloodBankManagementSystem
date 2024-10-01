@@ -1,0 +1,162 @@
+﻿@page "/donors"
+@using BloodBankManagementSystem.BLL.Services.Donation
+@using General
+@using Shared.ViewModels
+
+<MudTable Items="DonorsList" RowsPerPage="10" Hover="true" Striped="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Donors</MudText>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>Gender</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>City</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.FirstName @context.LastName</MudTd>
+        <MudTd>@context.Gender</MudTd>
+        <MudTd>@context.Email</MudTd>
+        <MudTd>@context.City.Description</MudTd>
+        <MudTd>
+            <MudButton Size="Size.Small" OnClick="@(() => OpenDialog(context.ID))" Color="Color.Default">View Details</MudButton>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@if (SelectedDonor != null)
+{
+    <MudDialog @ref="dialogRef" MaxWidth="MaxWidth.Large" Visible="@dialogVisible">
+        <TitleContent>
+            <MudText Typo="Typo.h5">Donor Information: @SelectedDonor.FirstName @SelectedDonor.LastName</MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudExpansionPanels>
+
+                <!-- Donations Section -->
+                <MudExpansionPanel Text="Donations">
+                    <MudTable Items="SelectedDonor.Donations" Striped="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Date</MudTh>
+                            <MudTh>Status</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.CreatedDate</MudTd>
+                            <MudTd>@context.DonationStatus</MudTd>
+                            <MudTd>
+                                <MudButton Size="Size.Small" OnClick="@(() => ShowDonationDetails(context))" Color="Color.Info">
+                                    View Donation Details
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+
+                <!-- Examinations Section -->
+                <MudExpansionPanel Text="Examinations">
+                    <MudTable Items="SelectedDonor.Examinations" Striped="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Date</MudTh>
+                            <MudTh>Result</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.CreatedDate</MudTd>
+                            <MudTd>@context.ExaminationResult.ResultValue</MudTd>
+                            <MudTd>
+                                <MudButton Size="Size.Small" OnClick="@(() => ShowExaminationDetails(context.ExaminationResult))" Color="Color.Info">
+                                    View Examination Details
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+
+                <!-- Questionnaire Section -->
+                <MudExpansionPanel Text="Questionnaire Responses">
+                    <MudTable Items="SelectedDonor.QuestionaireResponses" Striped="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Question</MudTh>
+                            <MudTh>Response</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@(context.Question.Text ?? string.Empty)</MudTd>
+                            <MudTd>@(context.Value ?? string.Empty)</MudTd>
+                            @* <MudTd>@(context.Answer.AnswerText ?? string.Empty)</MudTd> *@
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+
+                <!-- Suspension History Section -->
+                <MudExpansionPanel Text="Suspension History">
+                    <MudTable Items="SelectedDonor.SuspendedDonors" Striped="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Reason</MudTh>
+                            <MudTh>Duration</MudTh>
+                            <MudTh>Type</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Reason.Description</MudTd>
+                            <MudTd>@context.Reason.Duration</MudTd>
+                            <MudTd>@((context.Reason.Type).GetDisplayName())</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+
+            </MudExpansionPanels>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CloseDialog" Color="Color.Primary">Close</MudButton>
+        </DialogActions>
+    </MudDialog>
+
+}
+
+
+
+@code {
+    private List<FullDonorViewModel> DonorsList = new();
+    private FullDonorViewModel SelectedDonor;
+    [Inject] private IDonorService DonorService { get; set; }
+    private MudDialog dialogRef;
+    bool dialogVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        DonorsList = await DonorService.GetDonorsWithDetailsAsync();
+    }
+
+    private void ShowDetails(int donorId)
+    {
+
+    }
+
+    private void ShowDonationDetails(DonationViewModel donation)
+    {
+        // Show donation details logic
+    }
+
+    private void ShowExaminationDetails(ExaminationResultViewModel result)
+    {
+        // Show examination details logic
+    }
+
+    private async Task OpenDialog(int donorID)
+    {
+        SelectedDonor = DonorsList.FirstOrDefault(d => d.ID == donorID) ?? new FullDonorViewModel();
+        dialogVisible = true;
+        //StateHasChanged();
+
+    }
+
+    private void CloseDialog()
+    {
+        dialogVisible = false;
+    }
+
+}

@@ -1,0 +1,190 @@
+﻿@page "/suspension-reasons"
+@rendermode InteractiveServer
+@using General
+@using MudBlazor
+@using Shared.ViewModels
+@using Microsoft.AspNetCore.Authorization
+@using static General.Enums
+@attribute [Authorize]
+
+<MudDataGrid T="SuspensionReasonViewModel" MultiSelection="true" Items="@SuspensionReasonsList" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+             Hideable="true" ReadOnly="@_readOnly" EditMode="@DataGridEditMode.Form"
+             StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
+             Bordered="true" Dense="true" EditTrigger="@DataGridEditTrigger.Manual" @ref="@_dataGrid">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">SuspensionReasons</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="SuspensionReasonViewModel" />
+        <PropertyColumn Property="x => x.Code" Title="Code" />
+        <PropertyColumn Property="x => x.Description" Title="Description" />
+
+        <PropertyColumn Property="x => x.Type" Title="Type">
+            <EditTemplate>
+                <MudSelect Class="mt-2" T="SuspensionType" @bind-Value="context.Item.Type" Placeholder="Type" Text="@context.Item.Type.GetDisplayName()">
+                    @foreach (SuspensionType type in Enum.GetValues(typeof(SuspensionType)))
+                    {
+                        <MudSelectItem T="SuspensionType" Value="@type">@type.GetDisplayName()</MudSelectItem>
+                    }
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+
+        <PropertyColumn Property="x=>x.Duration" Title="Duration">
+            <EditTemplate>
+                <MudNumericField T="double?" Disabled="@(context.Item.Type == SuspensionType.Permanent)" Label="Duration" @bind-Value="context.Item.Duration" Variant="Variant.Outlined" Immediate="true" />
+            </EditTemplate>
+        </PropertyColumn>
+
+        <PropertyColumn Property="x => x.DurationUomID" Title="Unit Of Measurement">
+            <CellTemplate>
+                @{
+                    var unit = UnitsOfMeasurement.FirstOrDefault(u => u.ID == context.Item.DurationUomID);
+                }
+                @if (unit != null)
+                {
+                    @unit.Description 
+                }
+            </CellTemplate>
+            <EditTemplate>
+                <MudSelect T="int?" @bind-Value="context.Item.DurationUomID"
+                           Variant="Variant.Text"
+                           Disabled="@(context.Item.Type == SuspensionType.Permanent)"
+                           Placeholder="Unit Of Measurement"
+                           Clearable="true" Class="mb-2 mt-2">
+                    <MudSelectItem Value="@((int?)null)" Disabled="true">Select a unit</MudSelectItem>
+                    @foreach (var unit in UnitsOfMeasurement)
+                    {
+                        <MudSelectItem T="int?" Value="@unit.ID">@unit.Description</MudSelectItem>
+                    }
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-end" HeaderClass="d-flex justify-center">
+            <HeaderTemplate>
+                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.AddCircle" OnClick="@(() => _dataGrid.SetEditingItemAsync(new SuspensionReasonViewModel()))" />
+            </HeaderTemplate>
+            <CellTemplate>
+                <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudIconButton Size="@Size.Medium" Style="@($"color:{Colors.Red.Accent4}; background:{Colors.Shades.White};")" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(() => OnDeleteButtonClickedAsync(context.Item))" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+
+
+    <PagerContent>
+        <MudDataGridPager T="SuspensionReasonViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<MudExpansionPanels Style="flex:1">
+    <MudExpansionPanel Text="Show Events">
+        @foreach (var message in _events)
+        {
+            <MudText Typo="@Typo.body2">@message</MudText>
+        }
+        @if (_events.Count > 0)
+        {
+            <div class="d-flex">
+                <MudSpacer />
+                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">Clear</MudButton>
+            </div>
+        }
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+<MudMessageBox @ref="_mudMessageBox" Title="Warning" CancelText="Cancel">
+    <MessageContent>
+        Deleting can <b><i>not</i></b> be undone!
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
+    </YesButton>
+</MudMessageBox>
+
+
+@code {
+    [Inject] private ISuspensionReasonService SuspensionReasonsService { get; set; }
+    [Inject] private IUnitOfMeasurementService UnitOfMeasurementService { get; set; }
+    private IEnumerable<SuspensionReasonViewModel> SuspensionReasonsList = new List<SuspensionReasonViewModel>();
+    private IEnumerable<UnitOfMeasurementViewModel> UnitsOfMeasurement = new List<UnitOfMeasurementViewModel>();
+    private string _searchString = "";
+    private List<string> _events = new();
+    private bool _readOnly;
+    private MudMessageBox _mudMessageBox;
+    private string _state = "Message box hasn't been opened yet";
+    private MudDataGrid<SuspensionReasonViewModel> _dataGrid = new MudDataGrid<SuspensionReasonViewModel>();
+
+    private Func<SuspensionReasonViewModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Code.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Description.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUpdatedGrid();
+    }
+
+    void StartedEditingItem(SuspensionReasonViewModel item)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    void CanceledEditingItem(SuspensionReasonViewModel item)
+    {
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    async void CommittedItemChanges(SuspensionReasonViewModel item)
+    {
+        if (item.ID == 0)
+        {
+            var result = await SuspensionReasonsService.Add(item);
+            if (result.Success)
+                _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        }
+        else
+        {
+            var result = await SuspensionReasonsService.Update(item);
+            if (result.Success)
+                _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        }
+        await GetUpdatedGrid();
+        StateHasChanged();
+
+    }
+
+    private async Task OnDeleteButtonClickedAsync(SuspensionReasonViewModel item)
+    {
+        bool? result = await _mudMessageBox.ShowAsync();
+        _state = result is null ? "Canceled" : "Deleted!";
+        if (result == true)
+        {
+            var actionResult = await SuspensionReasonsService.Delete(item.ID);
+            if (actionResult.Success)
+                _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        }
+        await GetUpdatedGrid();
+        StateHasChanged();
+    }
+
+    private async Task GetUpdatedGrid()
+    {
+        var result = await SuspensionReasonsService.GetAll();
+        SuspensionReasonsList = result.Result == null ? SuspensionReasonsList : result.Result;
+        var units = await UnitOfMeasurementService.GetAll();
+        UnitsOfMeasurement = (List<UnitOfMeasurementViewModel>)(units.Result == null ? UnitsOfMeasurement : units.Result);
+    }
+}

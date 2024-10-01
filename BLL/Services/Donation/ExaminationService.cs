@@ -12,6 +12,7 @@ public interface IExaminationService
     Task<ApiResponse<bool>> UpdateExaminationAsync(ExaminationViewModel examination);
     Task<ApiResponse<bool>> DeleteExaminationAsync(int examination);
     Task<ApiResponse<List<DonationExaminationViewModel>>> GetDonorFormExaminationsAsync();
+    Task<ApiResponse<bool>> SaveDonorExaminationsAsync(List<ExaminationResultViewModel> examinations);
     #endregion Examinations
 
     #region ReferenceValues
@@ -245,6 +246,21 @@ public class ExaminationService : IExaminationService
         catch (Exception ex)
         {
             return ApiResponse<bool>.ApiInternalServerErrorResponse(ex.Message);
+        }
+    }
+
+    public async Task<ApiResponse<bool>> SaveDonorExaminationsAsync(List<ExaminationResultViewModel> results)
+    {
+        try
+        {
+            await _repository.CreateRangeAsync(_mapper.Map<List<ExaminationResult>>(results));
+            await _repository.SaveAsync();
+            return ApiResponse<bool>.ApiOkResponse(true);
+        }
+        catch (Exception)
+        {
+
+            throw;
         }
     }
 

@@ -86,13 +86,12 @@
     [Inject] private IDonorService DonorService { get; set; }
     [Inject] private IQuestionService QuestionService { get; set; }
     [Parameter] public int DonorId { get; set; }
+    [Parameter] public EventCallback<bool> OnQuestionaireRegistered { get; set; }
     private bool disabled = false;
     private List<QuestionaireViewModel> questionsList = new();
-    [Parameter] public EventCallback<bool> OnQuestionaireRegistered { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        // Load questions based on the DonorId
         var result = await QuestionService.GetDonorQuestionaire(DonorId);
         questionsList = result.Result ?? new List<QuestionaireViewModel>();
     }
@@ -106,15 +105,9 @@
             await DonorService.SubmitAnswers(questionsList);
             disabled = true;
             OnQuestionaireRegistered.InvokeAsync(true);
-            // Additional logic after submission (e.g., success message)
         }
     }
 
-    // private void ToggleError()
-    // {
-    //     MyStep.ToggleError(!MyStep.HasError);
-    //     StateHasChanged();
-    // }
 
 }
 

@@ -14,4 +14,5 @@ public class DonationViewModel
     public int VolumeUomID { get; set; }
     public int ProblemID { get; set; }
     public int ReactionID { get; set; }
+    public DateTime CreatedDate { get; set; }
 }

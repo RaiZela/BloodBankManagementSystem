@@ -1,4 +1,5 @@
-﻿using static General.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using static General.Enums;
 
 namespace BloodBankManagementSystem.BLL.Services.Donation;
 
@@ -10,6 +11,8 @@ public interface IDonorService
     public Task<ApiResponse<DonorViewModel>> Get(int id);
     public Task<ApiResponse<List<DonorViewModel>>> GetAll();
     public Task<ApiResponse<bool>> SubmitAnswers(List<QuestionaireViewModel> questionaires);
+    public Task<ApiResponse<bool>> SuspendDonor(int donorID, int reasonID);
+    Task<List<FullDonorViewModel>> GetDonorsWithDetailsAsync();
 }
 
 public class DonorService : IDonorService
@@ -126,4 +129,59 @@ public class DonorService : IDonorService
         }
 
     }
+
+    public async Task<ApiResponse<bool>> SuspendDonor(int donorID, int reasonID)
+    {
+        try
+        {
+            var donor = await _repository.GetQueryable<Donor>(x => x.ID == donorID).Include(x => x.SuspendedDonors).FirstOrDefaultAsync();
+            if (donor is null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            var suspensionReason = await _repository.GetQueryable<SuspensionReason>(x => x.ID == reasonID).FirstOrDefaultAsync();
+
+            if (suspensionReason is null)
+                return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
+
+            donor.IsSuspended = true;
+
+            if (donor.SuspendedDonors == null)
+                donor.SuspendedDonors = new();
+
+            donor.SuspendedDonors.Add(new SuspendedDonors()
+            {
+                DonorID = donorID,
+                ReasonID = reasonID
+            });
+
+
+            _repository.Update<Donor>(donor);
+            await _repository.SaveAsync();
+            return ApiResponse<bool>.ApiOkResponse(true);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+
+    }
+
+    public async Task<List<FullDonorViewModel>> GetDonorsWithDetailsAsync()
+    {
+        var donors = await _repository.GetQueryable<Donor>(x=>!x.IsDeleted)
+            .Include(d => d.City)
+            .Include(d => d.Donations)
+            .Include(d => d.QuestionaireResponses)
+                 .ThenInclude(x => x.Question)
+            .Include(d => d.SuspendedDonors)
+                .ThenInclude(sd => sd.Reason).ThenInclude(x=>x.DurationUom)
+            .Include(x => x.ExaminationResults)
+                .ThenInclude(x => x.Examination)
+                .OrderByDescending(x=>x.CreatedDate)
+            .ToListAsync();
+
+        return _mapper.Map<List<FullDonorViewModel>>(donors);
+    }
+
 }

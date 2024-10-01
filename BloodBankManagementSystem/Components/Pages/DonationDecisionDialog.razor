@@ -1,0 +1,75 @@
+﻿@using BloodBankManagementSystem.BLL.Services.Donation
+@using MudBlazor
+@using Shared.ViewModels
+
+<MudDialog Options="new DialogOptions(){ MaxWidth = MaxWidth.Large, FullWidth = true}">
+    <TitleContent>Donation Decision</TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1">@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <div class="d-flex flex-column">
+            <div class="d-flex flex-row">
+                <MudButton OnClick="ConfirmDonation" Color="Color.Default">@ButtonConfirmText</MudButton>
+                <MudButton OnClick="DeclineDonation" Color="Color.Error">@ButtonDeclineText</MudButton>
+            </div>
+            <MudPaper Class="d-flex align-center pa-2 mx-2 my-2">
+                @if (ShowReasonDropdown)
+                {
+                    <MudSelect Class="mt-1 ml-3" FullWidth="true" T="int" Label="Reason" @bind-Value="SelectedReason">
+                        <MudSelectItem Value="0" Disabled="true">Select a value</MudSelectItem>
+                        @foreach (var reason in SuspensionReasons)
+                        {
+                            <MudSelectItem T="int" Value="@reason.ID">@reason.Description</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton OnClick="SubmitReason" Color="Color.Primary" Class="mt-3">Submit</MudButton>
+                }
+            </MudPaper>
+
+        </div>
+    </DialogActions>
+
+
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string ContentText { get; set; }
+    [Parameter] public string ButtonConfirmText { get; set; } = "Donates";
+    [Parameter] public string ButtonDeclineText { get; set; } = "Does not donate";
+    [Parameter] public int DonorID { get; set; }
+    [Inject] private ISuspensionReasonService SuspensionReasonService { get; set; }
+    [Inject] private IDonorService DonorService { get; set; }
+    private List<SuspensionReasonViewModel> SuspensionReasons = new();
+
+    private bool ShowReasonDropdown { get; set; } = false;
+    private int SelectedReason { get; set; }
+
+    void ConfirmDonation()
+    {
+        SelectedReason = 0;
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    async Task DeclineDonation()
+    {
+        // Show the dropdown for the reason
+        var reasons = await SuspensionReasonService.GetAll();
+        SuspensionReasons = reasons.Result ?? SuspensionReasons;
+        ShowReasonDropdown = true;
+
+    }
+
+    async Task SubmitReason()
+    {
+        // Handle reason submission, close the dialog
+        if (SelectedReason != 0)
+        {
+            // Handle the selected reason for not donating
+            await DonorService.SuspendDonor(DonorID, SelectedReason);
+            MudDialog.Close(DialogResult.Ok(SelectedReason));
+        }
+    }
+}

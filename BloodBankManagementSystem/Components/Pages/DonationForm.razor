@@ -1,5 +1,6 @@
 ﻿@page "/donation-form"
 @using Microsoft.AspNetCore.Authorization
+@inject IDialogService DialogService
 @attribute [Authorize]
 
 <MyMudStepper @ref="_stepper">
@@ -19,7 +20,7 @@
     <MyMudStep Title="Examinations" @ref="_steps[2]">
         @if (isStepCompleted[1])
         {
-            <!-- Add content for Examinations step here -->
+            <DonationExamination DonorId="DonorId" OnExaminationRegistered="HandleExaminationRegistered"></DonationExamination>
         }
     </MyMudStep>
 </MyMudStepper>
@@ -42,6 +43,40 @@
     {
         isStepCompleted[1] = true;
         GoToNextStep();
+    }
+
+    private void HandleExaminationRegistered(bool done)
+    {
+        isStepCompleted[2] = true;
+        OpenDonationPopup();
+    }
+
+    private async Task OpenDonationPopup()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Can the donor donate blood?" },
+            { "ButtonConfirmText", "Donates" },
+            { "ButtonDeclineText", "Does not donate" },
+            {"DonorID" , DonorId}
+        };
+
+        var dialog = DialogService.Show<DonationDecisionDialog>("Donation Decision", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            if (result.Data is bool canDonate && canDonate)
+            {
+                // Handle the case where the donor can donate
+                Console.WriteLine("The donor can donate blood.");
+            }
+            else if (result.Data is string reason)
+            {
+                // Handle the selected reason for not donating
+                Console.WriteLine($"The donor cannot donate because: {reason}");
+            }
+        }
     }
 
     private void GoToNextStep()
