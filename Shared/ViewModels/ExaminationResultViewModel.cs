@@ -9,4 +9,5 @@ public class ExaminationResultViewModel
     public double ResultValue { get; set; }
     public int? DonationID { get; set; }
     public int DonorID { get; set; }
+    public DateTime CreatedDate { get; set; }
 }

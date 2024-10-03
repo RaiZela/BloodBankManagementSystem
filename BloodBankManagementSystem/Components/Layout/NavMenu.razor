@@ -74,15 +74,15 @@
 </div> *@
 <MudPaper Width="250px" Class="py-3" Elevation="0">
     <MudNavMenu Bordered=true Color="Color.Info">
-        <MudText Typo="Typo.h6" Class="px-4">My Application</MudText>
-        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="fas fa-chart-line">Dashboard</MudNavLink>
-        <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Secondary Text</MudText>
+        <MudText Typo="Typo.h6" Class="px-4">BLOOD BANK</MudText>
+        <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Blood Bank Management System</MudText>
         <MudDivider Class="my-2" />
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="fas fa-chart-line">Dashboard</MudNavLink>
         <MudNavGroup Title="Donations" Expanded="true" Icon="fas fa-hand-holding-heart">
             <MudNavLink Href="/donation-form" Icon="fas fa-plus" Match="NavLinkMatch.All">Add Donation</MudNavLink>
             <MudNavLink Href="/donors" Icon="fas fa-user" Match="NavLinkMatch.All">Donors</MudNavLink>
         </MudNavGroup>
-@*         <MudNavLink class="nav-link" Href="Account/Manage" Match="NavLinkMatch.All"><span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @userName</MudNavLink> *@
+        @*         <MudNavLink class="nav-link" Href="Account/Manage" Match="NavLinkMatch.All"><span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @userName</MudNavLink> *@
         <MudNavGroup Title="Settings" Expanded="true" Icon="fas fa-cogs">
             <MudNavLink Href="/clinics" Match="NavLinkMatch.All">Clinics</MudNavLink>
             <MudNavLink Href="/donationSymptoms" Match="NavLinkMatch.All">Donation Symptoms</MudNavLink>

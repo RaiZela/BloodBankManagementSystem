@@ -48,7 +48,7 @@ public class FullDonorViewModel : DonorViewModel
     public CityViewModel City { get; set; } 
     public List<ResponseViewModel> QuestionaireResponses { get; set; }
     public List<SuspendedDonorsViewModel> SuspendedDonors { get; set; } 
-    public List<DonationExaminationViewModel> Examinations { get; set; }
+    public List<ExaminationResultViewModel> ExaminationResults { get; set; }
 }
 
 
@@ -63,7 +63,6 @@ public class AlphanumericStringAttribute : ValidationAttribute
             return new ValidationResult("The string must be exactly 10 characters long.");
         }
 
-        // Check the pattern: letter, digits (8), letter
         var regex = new Regex(@"^[A-Za-z]\d{8}[A-Za-z]$");
 
         if (!regex.IsMatch(stringValue))

@@ -1,7 +1,10 @@
 ﻿@page "/donors"
 @using BloodBankManagementSystem.BLL.Services.Donation
 @using General
+@using Microsoft.AspNetCore.Authorization
 @using Shared.ViewModels
+@rendermode InteractiveServer
+@attribute [Authorize]
 
 <MudTable Items="DonorsList" RowsPerPage="10" Hover="true" Striped="true">
     <ToolBarContent>
@@ -48,48 +51,61 @@
                         <RowTemplate>
                             <MudTd>@context.CreatedDate</MudTd>
                             <MudTd>@context.DonationStatus</MudTd>
-                            <MudTd>
-                                <MudButton Size="Size.Small" OnClick="@(() => ShowDonationDetails(context))" Color="Color.Info">
-                                    View Donation Details
-                                </MudButton>
-                            </MudTd>
+
                         </RowTemplate>
                     </MudTable>
                 </MudExpansionPanel>
 
                 <!-- Examinations Section -->
                 <MudExpansionPanel Text="Examinations">
-                    <MudTable Items="SelectedDonor.Examinations" Striped="true" Hover="true">
-                        <HeaderContent>
-                            <MudTh>Date</MudTh>
-                            <MudTh>Result</MudTh>
-                            <MudTh>Actions</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>@context.CreatedDate</MudTd>
-                            <MudTd>@context.ExaminationResult.ResultValue</MudTd>
-                            <MudTd>
-                                <MudButton Size="Size.Small" OnClick="@(() => ShowExaminationDetails(context.ExaminationResult))" Color="Color.Info">
-                                    View Examination Details
-                                </MudButton>
-                            </MudTd>
-                        </RowTemplate>
-                    </MudTable>
+                    <MudExpansionPanels>
+                        @if (GroupedExaminations != null)
+                        {
+                            @foreach (var group in GroupedExaminations)
+                            {
+                                <!-- Create an expansion panel for each date group -->
+                                <MudExpansionPanel Text="@group.Key.ToString("dd-MM-yyyy")" Expanded="false">
+                                    <MudTable Items="group.ToList()" Striped="true" Hover="true">
+                                        <HeaderContent>
+                                            <MudTh>Other Info</MudTh>
+                                            <MudTh>Examination Result</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd>@context.Examination.Description</MudTd>
+                                            <MudTd>@context.ResultValue</MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
+                                </MudExpansionPanel>
+                            }
+                        }
+                    </MudExpansionPanels>
                 </MudExpansionPanel>
+
 
                 <!-- Questionnaire Section -->
                 <MudExpansionPanel Text="Questionnaire Responses">
-                    <MudTable Items="SelectedDonor.QuestionaireResponses" Striped="true" Hover="true">
-                        <HeaderContent>
-                            <MudTh>Question</MudTh>
-                            <MudTh>Response</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>@(context.Question.Text ?? string.Empty)</MudTd>
-                            <MudTd>@(context.Value ?? string.Empty)</MudTd>
-                            @* <MudTd>@(context.Answer.AnswerText ?? string.Empty)</MudTd> *@
-                        </RowTemplate>
-                    </MudTable>
+                    <MudExpansionPanels>
+                        @if (GroupedQuestions != null)
+                        {
+                            @foreach (var group in GroupedQuestions)
+                            {
+                                <!-- Create an expansion panel for each date group -->
+                                <MudExpansionPanel Text="@group.Key.ToString("dd-MM-yyyy")" Expanded="false">
+                                    <MudTable Items="group.ToList()" Striped="true" Hover="true">
+                                        <HeaderContent>
+                                            <MudTh>Question</MudTh>
+                                            <MudTh>Response</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd>@(context.Question.Text ?? string.Empty)</MudTd>
+                                            <MudTd>@(context.Value ?? string.Empty)</MudTd>
+                                            @* <MudTd>@(context.Answer.AnswerText ?? string.Empty)</MudTd> *@
+                                        </RowTemplate>
+                                    </MudTable>
+                                </MudExpansionPanel>
+                            }
+                        }
+                    </MudExpansionPanels>
                 </MudExpansionPanel>
 
                 <!-- Suspension History Section -->
@@ -128,31 +144,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        DonorsList = await DonorService.GetDonorsWithDetailsAsync();
+        var result = await DonorService.GetDonorsWithDetailsAsync();
+        DonorsList = result;
     }
 
-    private void ShowDetails(int donorId)
-    {
-
-    }
-
-    private void ShowDonationDetails(DonationViewModel donation)
-    {
-        // Show donation details logic
-    }
-
-    private void ShowExaminationDetails(ExaminationResultViewModel result)
-    {
-        // Show examination details logic
-    }
+    private IEnumerable<IGrouping<DateTime, ExaminationResultViewModel>> GroupedExaminations;
+    private IEnumerable<IGrouping<DateTime, ResponseViewModel>> GroupedQuestions;
 
     private async Task OpenDialog(int donorID)
     {
         SelectedDonor = DonorsList.FirstOrDefault(d => d.ID == donorID) ?? new FullDonorViewModel();
+        GroupedExaminations = SelectedDonor.ExaminationResults
+          .GroupBy(exam => exam.CreatedDate.Date);
+        GroupedQuestions = SelectedDonor.QuestionaireResponses.GroupBy(exam => exam.CreatedDate.Date);
         dialogVisible = true;
-        //StateHasChanged();
-
     }
+
 
     private void CloseDialog()
     {

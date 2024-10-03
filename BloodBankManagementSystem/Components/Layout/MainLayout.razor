@@ -7,28 +7,34 @@
 <MudSnackbarProvider />
 <MudPopoverProvider />
 <MudLayout>
-    <MudPaper Elevation="25">
-        <MudToolBar>
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e)=>DrawerToggle())" />
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Outlined.Notifications" />
-            <MudMenu Icon="@Icons.Material.Outlined.Notifications"
-                     AriaLabel="Open user menu">
-                <MudMenuItem>Profile</MudMenuItem>
-                <MudMenuItem>My account</MudMenuItem>
-                <MudMenuItem>Logout</MudMenuItem>
-            </MudMenu>
-            <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="MyCustomTheme"></MudThemeProvider>
+    <AuthorizeView>
 
-            <MudToggleIconButton @bind-Toggled="@_isDarkMode" Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Default"
-                                 ToggledIcon="@Icons.Material.Filled.WbSunny" ToggledColor="@Color.Default"></MudToggleIconButton>
+        <MudPaper Elevation="25">
+            <MudToolBar>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e)=>DrawerToggle())" />
+                <MudSpacer />
+                <MudMenu Icon="@Icons.Material.Outlined.Notifications"
+                         AriaLabel="Open user menu">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </MudMenu>
+                <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="MyCustomTheme"></MudThemeProvider>
 
-            <MudAvatar Color="Color.Success" Variant="Variant.Outlined">R</MudAvatar>
-        </MudToolBar>
-    </MudPaper>
-    <MudDrawer @bind-Open="@_drawerOpen">
-        <NavMenu />
-    </MudDrawer>
+                <MudToggleIconButton @bind-Toggled="@_isDarkMode" Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Default"
+                                     ToggledIcon="@Icons.Material.Filled.WbSunny" ToggledColor="@Color.Default"></MudToggleIconButton>
+
+                <MudAvatar Color="Color.Success" Variant="Variant.Outlined">R</MudAvatar>
+            </MudToolBar>
+        </MudPaper>
+        <MudDrawer @bind-Open="@_drawerOpen">
+            <NavMenu />
+        </MudDrawer>
+    </AuthorizeView>
     <MudMainContent>
         @Body
     </MudMainContent>

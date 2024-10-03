@@ -29,7 +29,8 @@ public class MapProfile : AutoMapper.Profile
 
 
         CreateMap<Donor, DonorViewModel>().ReverseMap();
-        CreateMap<Donor, FullDonorViewModel>().ReverseMap();
+        CreateMap<Donor, FullDonorViewModel>()
+            .ReverseMap();
         CreateMap<SuspendedDonors, SuspendedDonorsViewModel>().ReverseMap();
         CreateMap<Donation, DonationViewModel>().ReverseMap();
 
@@ -61,7 +62,7 @@ public class MapProfile : AutoMapper.Profile
 
         CreateMap<ReferenceValue, ReferenceValueViewModel>().ReverseMap();
 
-        CreateMap<Examination, DonationExaminationViewModel>().ReverseMap();
+        CreateMap<ExaminationResult, DonationExaminationViewModel>().ReverseMap();
 
         CreateMap<UnitOfMeasurement, UnitOfMeasurementViewModel>().ReverseMap();
 

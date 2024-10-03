@@ -18,6 +18,6 @@ public class ResponseViewModel
     public AnswerViewModel? Answer { get; set; }
     public string? Value { get; set; }
     public QuestionType QuestionType { get; set; }
-
+    public DateTime CreatedDate { get; set; }
 
 }
