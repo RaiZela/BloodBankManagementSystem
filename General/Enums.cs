@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace General;
 
@@ -30,6 +29,7 @@ public class Enums
         Date,
         [Display(Name = "Number")]
         Number
+
     }
 
     public enum QuestionCategory

@@ -29,7 +29,7 @@
                                               @bind-Value="Donor.IdNumber" For="@(() => Donor.IdNumber)" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="4">
-                                <MudDatePicker Label="Birthday" Editable="true" @bind-Date="Donor.Birthday" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="de-AT Date" />
+                                <MudDatePicker Label="Birthday" Editable="true" @bind-Date="Donor.Birthday" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="Birthday" Required=true />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="4">
                                 <MudTextField Label="Email" Class="mt-3"

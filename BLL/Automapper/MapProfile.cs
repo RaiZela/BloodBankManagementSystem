@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using DAL.Data.DatabaseModels;
-using DAL.Data.DatabaseModels.User;
-using Shared.ViewModels;
+﻿using DAL.Data.DatabaseModels.User;
 
 namespace BloodBankManagementSystem.BLL.Automapper;
 
@@ -47,16 +44,19 @@ public class MapProfile : AutoMapper.Profile
 
         CreateMap<Response, ResponseViewModel>()
             .ReverseMap()
-            .ForMember(src => src.Question, dest=>dest.Ignore())
-            .ForMember(src => src.Donor, dest=>dest.Ignore())
-            .ForMember(src => src.AnswerID, dest=>dest.MapFrom(obj => obj.AnswerID == 0 ? null : obj.AnswerID))
-            .ForMember(src => src.Answer, dest=>dest.Ignore());
+            .ForMember(src => src.Question, dest => dest.Ignore())
+            .ForMember(src => src.Donor, dest => dest.Ignore())
+            .ForMember(src => src.AnswerID, dest => dest.MapFrom(obj => obj.AnswerID == 0 ? null : obj.AnswerID))
+            .ForMember(src => src.Answer, dest => dest.Ignore());
 
         CreateMap<ApplicationUser, ApplicationUserViewModel>()
             .ReverseMap();
 
 
         CreateMap<Examination, ExaminationViewModel>()
+            .ReverseMap();
+
+        CreateMap<Examination, DonationExaminationViewModel>()
             .ReverseMap();
 
 

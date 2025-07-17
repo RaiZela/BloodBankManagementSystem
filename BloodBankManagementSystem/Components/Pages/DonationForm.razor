@@ -18,10 +18,10 @@
     </MyMudStep>
 
     <MyMudStep Title="Examinations" @ref="_steps[2]">
-        @if (isStepCompleted[1])
-        {
+@*         @if (isStepCompleted[1])
+        { *@
             <DonationExamination DonorId="DonorId" OnExaminationRegistered="HandleExaminationRegistered"></DonationExamination>
-        }
+        @* } *@
     </MyMudStep>
 </MyMudStepper>
 

@@ -2,18 +2,27 @@
 @using MudBlazor
 @using Shared.ViewModels
 
-<MudDialog Options="new DialogOptions(){ MaxWidth = MaxWidth.Large, FullWidth = true}">
+<style>
+     .dialog {
+        width: 600px;
+    }
+
+    .select-reason-drowpdown {
+        width: -webkit-fill-available !important;
+    }
+</style>
+<MudDialog Class="dialog" Options="new DialogOptions(){ MaxWidth = MaxWidth.ExtraExtraLarge,FullScreen=true, FullWidth = true, CloseButton=false, CloseOnEscapeKey=false}" Variant="Variant.Filled">
     <TitleContent>Donation Decision</TitleContent>
     <DialogContent>
-        <MudText Typo="Typo.body1">@ContentText</MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center">@ContentText</MudText>
     </DialogContent>
     <DialogActions>
-        <div class="d-flex flex-column">
-            <div class="d-flex flex-row">
+        <div class="d-flex flex-column align-center">
+            <div class="d-flex flex-row align-center">
                 <MudButton OnClick="ConfirmDonation" Color="Color.Default">@ButtonConfirmText</MudButton>
                 <MudButton OnClick="DeclineDonation" Color="Color.Error">@ButtonDeclineText</MudButton>
             </div>
-            <MudPaper Class="d-flex align-center pa-2 mx-2 my-2">
+            <MudPaper Class="d-flex align-center pa-2 mx-2 my-2 select-reason-drowpdown">
                 @if (ShowReasonDropdown)
                 {
                     <MudSelect Class="mt-1 ml-3" FullWidth="true" T="int" Label="Reason" @bind-Value="SelectedReason">
@@ -37,8 +46,8 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     [Parameter] public string ContentText { get; set; }
-    [Parameter] public string ButtonConfirmText { get; set; } = "Donates";
-    [Parameter] public string ButtonDeclineText { get; set; } = "Does not donate";
+    [Parameter] public string ButtonConfirmText { get; set; } = "Yes";
+    [Parameter] public string ButtonDeclineText { get; set; } = "No";
     [Parameter] public int DonorID { get; set; }
     [Inject] private ISuspensionReasonService SuspensionReasonService { get; set; }
     [Inject] private IDonorService DonorService { get; set; }

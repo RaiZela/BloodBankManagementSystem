@@ -1,26 +1,24 @@
 using AutoMapper;
-using BloodBankManagementSystem.Components;
-using BloodBankManagementSystem.Components.Account;
-using BloodBankManagementSystem.DAL;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using MudBlazor.Services;
+using BloodBankManagementSystem.BLL;
 using BloodBankManagementSystem.BLL.Automapper;
+using BloodBankManagementSystem.BLL.Services;
 using BloodBankManagementSystem.BLL.Services.Donation;
 using BloodBankManagementSystem.BLL.Services.Policies;
 using BloodBankManagementSystem.BLL.Services.Questions;
 using BloodBankManagementSystem.BLL.Services.Settings;
-using BloodBankManagementSystem.BLL;
-using Shared.Messages;
+using BloodBankManagementSystem.Components;
+using BloodBankManagementSystem.Components.Account;
+using BloodBankManagementSystem.DAL;
+using DAL.Data.Seed;
 using General;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Serilog;
-using Microsoft.AspNetCore.Authorization;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using BloodBankManagementSystem;
-using BLL.Services.Users;
-using BloodBankManagementSystem.BLL.Services;
+using Shared.Messages;
 
 try
 {
@@ -32,11 +30,11 @@ try
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents().AddCircuitOptions(o =>
         {
-            if (builder.Environment.IsDevelopment()) 
+            if (builder.Environment.IsDevelopment())
             {
                 o.DetailedErrors = true;
             }
-        }); 
+        });
     //.AddInteractiveWebAssemblyComponents();
 
     builder.Services.AddCascadingAuthenticationState();
@@ -52,8 +50,10 @@ try
         .AddIdentityCookies();
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString), ServiceLifetime.Scoped);
+
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
     builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -66,6 +66,7 @@ try
     builder.Services.AddMudServices();
 
     builder.Services.AddEndpointsApiExplorer();
+
     builder.Services.AddSwaggerGen();
 
     //builder.Services.AddControllers()
@@ -150,6 +151,13 @@ try
     .CreateLogger();
 
     var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        // Seed the database with initial data.
+        Seed.SeedData(dbContext);
+    }
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

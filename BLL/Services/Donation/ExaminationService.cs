@@ -1,6 +1,4 @@
-﻿using DAL.Data.DatabaseModels;
-
-namespace BloodBankManagementSystem.BLL.Services;
+﻿namespace BloodBankManagementSystem.BLL.Services;
 
 public interface IExaminationService
 {
@@ -72,7 +70,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x=>x.ReferenceValues.Where(x=>!x.IsDeleted)).ToListAsync();
+            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x => x.ReferenceValues.Where(x => !x.IsDeleted)).ToListAsync();
             return ApiResponse<List<ExaminationViewModel>>.ApiOkResponse(_mapper.Map<List<ExaminationViewModel>>(examinations));
         }
         catch (Exception ex)
@@ -84,7 +82,9 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var examinations = await _repository.GetQueryable<Examination>(x => !x.IsDeleted).Include(x => x.ReferenceValues.Where(x => !x.IsDeleted)).ToListAsync();
+            var examinations = await _repository
+                .GetQueryable<Examination>(x => !x.IsDeleted)
+                .Include(x => x.ReferenceValues.Where(x => !x.IsDeleted)).ToListAsync();
 
             var result = _mapper.Map<List<DonationExaminationViewModel>>(examinations);
             return ApiResponse<List<DonationExaminationViewModel>>.ApiOkResponse(result);
@@ -99,7 +99,7 @@ public class ExaminationService : IExaminationService
     {
         try
         {
-            var record = await _repository.GetQueryable<Examination>(x => x.ID == examination.ID).Include(x=>x.ReferenceValues).FirstOrDefaultAsync();
+            var record = await _repository.GetQueryable<Examination>(x => x.ID == examination.ID).Include(x => x.ReferenceValues).FirstOrDefaultAsync();
             if (record == null)
                 return ApiResponse<bool>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
 
@@ -109,7 +109,7 @@ public class ExaminationService : IExaminationService
             {
                 var existing = referenceValues.FirstOrDefault(x => x.ID == updated.ID);
 
-                if (existing!= null && existing.ID != 0)
+                if (existing != null && existing.ID != 0)
                 {
                     _mapper.Map(updated, existing);
                 }
