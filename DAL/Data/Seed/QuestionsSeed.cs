@@ -203,7 +203,6 @@ public static class QuestionsSeed
 
         };
             dbContext.AddRange(questions);
-            dbContext.SaveChanges();
         }
         catch (Exception ex)
         {

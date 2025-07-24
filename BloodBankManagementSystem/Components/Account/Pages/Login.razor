@@ -11,23 +11,18 @@
 @inject IdentityRedirectManager RedirectManager
 
 <style>
-/*     * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Quicksand', sans-serif;
-    } */
 
     body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        top: 0px;
+        padding: 0px;
+        display: grid;
+        justify-content: start;
         min-height: 100vh;
         background: #000;
     }
 
     section {
-        position: absolute;
+        position: relative;
         width: 100vw;
         height: 100vh;
         display: flex;
@@ -36,6 +31,7 @@
         gap: 2px;
         flex-wrap: wrap;
         overflow: hidden;
+        margin-top: -70px !important;
     }
 
         section::before {

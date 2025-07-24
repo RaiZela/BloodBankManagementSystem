@@ -155,6 +155,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate();
         // Seed the database with initial data.
         Seed.SeedData(dbContext);
     }

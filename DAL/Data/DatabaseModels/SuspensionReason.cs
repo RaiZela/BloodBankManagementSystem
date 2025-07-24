@@ -13,4 +13,6 @@ public class SuspensionReason : BasicParameters
     [DeleteBehavior(DeleteBehavior.NoAction)]
     public virtual UnitOfMeasurement? DurationUom { get; set; }
     public virtual List<SuspendedDonors> SuspendedDonors { get; set; }
+
+    //TODO type, in the examination or blood examination to show in the dropdown
 }

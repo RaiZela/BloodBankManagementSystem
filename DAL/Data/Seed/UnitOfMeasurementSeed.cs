@@ -49,7 +49,6 @@ public static class UnitOfMeasurementSeed
                     },
                 };
             dbcontext.UnitsOfMeasurements.AddRange(unitOfMeasurements);
-            dbcontext.SaveChanges();
         }
         catch (Exception ex)
         {

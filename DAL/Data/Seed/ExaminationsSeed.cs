@@ -121,7 +121,6 @@ public static class ExaminationsSeed
                 },
             };
             dbContext.AddRange(examinations);
-            dbContext.SaveChanges();
         }
         catch (Exception ex)
         {
