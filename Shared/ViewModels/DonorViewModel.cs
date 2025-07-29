@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using static General.Enums;
 
@@ -20,6 +19,7 @@ public class DonorViewModel
     public Gender Gender { get; set; }
 
     [Required]
+    [BirthdayValidation]
     public DateTime? Birthday { get; set; }
 
     [Required]
@@ -45,9 +45,9 @@ public class DonorViewModel
 public class FullDonorViewModel : DonorViewModel
 {
     public List<DonationViewModel> Donations { get; set; }
-    public CityViewModel City { get; set; } 
+    public CityViewModel City { get; set; }
     public List<ResponseViewModel> QuestionaireResponses { get; set; }
-    public List<SuspendedDonorsViewModel> SuspendedDonors { get; set; } 
+    public List<SuspendedDonorsViewModel> SuspendedDonors { get; set; }
     public List<ExaminationResultViewModel> ExaminationResults { get; set; }
 }
 
@@ -69,6 +69,17 @@ public class AlphanumericStringAttribute : ValidationAttribute
         {
             return new ValidationResult("The string must start and end with a letter and have 8 digits in between.");
         }
+
+        return ValidationResult.Success;
+    }
+}
+
+public class BirthdayValidation : ValidationAttribute
+{
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value is DateTime date && date.Year < DateTime.Today.Year - 17)
+            return new ValidationResult("Age should be at least 17.");
 
         return ValidationResult.Success;
     }
