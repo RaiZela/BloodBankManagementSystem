@@ -6,5 +6,5 @@ public class BasicParameters : AuditableEntity
     public string Code { get; set; }
     [Required]
     public string Description { get; set; }
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; set; } = true;
 }
