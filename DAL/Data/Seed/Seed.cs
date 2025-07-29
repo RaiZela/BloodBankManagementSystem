@@ -27,6 +27,9 @@ public static class Seed
         if (!dbContext.SuspensionReasons.Any())
             SuspensionReasonSeed.SeedSuspensionReasons(dbContext);
 
+        if (!dbContext.Cities.Any())
+            CitySeed.SeedCities(dbContext);
+
         dbContext.SaveChanges();
     }
 }
