@@ -220,5 +220,7 @@ This project reflects real-world healthcare workflows while showing:
 
 - Scalability for institutional use
 
+# Database Scheme
 
+<img width="4369" height="3298" alt="SqlGenerated BBMS" src="https://github.com/user-attachments/assets/74af39d0-0291-49c7-b099-13914f7fb5de" />
 
