@@ -33,7 +33,7 @@
 
 @if (SelectedDonor != null)
 {
-    <MudDialog @ref="dialogRef" MaxWidth="MaxWidth.Large" Visible="@dialogVisible">
+    <MudDialog @ref="dialogRef" MaxWidth="MaxWidth.Large" Visible="@dialogVisible" >
         <TitleContent>
             <MudText Typo="Typo.h5">Donor Information: @SelectedDonor.FirstName @SelectedDonor.LastName</MudText>
         </TitleContent>

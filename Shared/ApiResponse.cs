@@ -17,7 +17,7 @@ public class ApiResponse<T>
 
     public static ApiResponse<T> ApiOkResponse(T result, string? message = null)
     {
-        return new ApiResponse<T>(200, true, result);
+        return new ApiResponse<T>(200, true, result, message);
     }
 
     public static ApiResponse<T> ApiNoContentResponse(string? message = null)

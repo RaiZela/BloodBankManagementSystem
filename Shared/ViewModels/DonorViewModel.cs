@@ -19,7 +19,7 @@ public class DonorViewModel
     public Gender Gender { get; set; }
 
     [Required]
-    [BirthdayValidation]
+    [AgeRange(17, 70)]
     public DateTime? Birthday { get; set; }
 
     [Required]
@@ -74,12 +74,31 @@ public class AlphanumericStringAttribute : ValidationAttribute
     }
 }
 
-public class BirthdayValidation : ValidationAttribute
+public class AgeRangeAttribute : ValidationAttribute
 {
-    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    private readonly int _min;
+    private readonly int _max;
+
+    public AgeRangeAttribute(int min, int max)
     {
-        if (value is DateTime date && date.Year < DateTime.Today.Year - 17)
-            return new ValidationResult("Age should be at least 17.");
+        _min = min;
+        _max = max;
+    }
+
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        if (value == null)
+            return new ValidationResult("Date of birth is required.");
+
+        if (value is not DateTime date)
+            return new ValidationResult("Invalid date format.");
+
+        var today = DateTime.Today;
+        var age = today.Year - date.Year;
+        if (date > today.AddYears(-age)) age--;
+
+        if (age < _min || age > _max)
+            return new ValidationResult($"Age should be between {_min} and {_max}.");
 
         return ValidationResult.Success;
     }

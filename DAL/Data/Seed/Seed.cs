@@ -30,6 +30,7 @@ public static class Seed
         if (!dbContext.Cities.Any())
             CitySeed.SeedCities(dbContext);
 
+
         dbContext.SaveChanges();
     }
 }

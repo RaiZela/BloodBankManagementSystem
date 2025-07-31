@@ -1,13 +1,10 @@
-using DAL.Data.Base.Models;
-using DAL.Data.DatabaseModels;
 using DAL.Data.DatabaseModels.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 
 namespace BloodBankManagementSystem.DAL;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Role, string>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
@@ -62,7 +59,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     #region Processes
     public DbSet<Equipment> Equipments { get; set; }
     public DbSet<Process> Processes { get; set; }
-    public DbSet<ProcessDetail> ProcessesDetails{get;set;}
+    public DbSet<ProcessDetail> ProcessesDetails { get; set; }
     #endregion
 
     #region Components
@@ -156,7 +153,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     private void UpdateAuditEntities()
     {
-        var user=GetCurrentUser();
+        var user = GetCurrentUser();
         var modifiedEntries = ChangeTracker.Entries()
             .Where(x => x.Entity is AuditableEntity && x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
 
@@ -196,7 +193,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public string GetCurrentUser()
     {
-        return  _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "System";
-       
+        return _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "System";
+
     }
 }

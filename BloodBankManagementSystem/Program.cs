@@ -9,6 +9,7 @@ using BloodBankManagementSystem.BLL.Services.Settings;
 using BloodBankManagementSystem.Components;
 using BloodBankManagementSystem.Components.Account;
 using BloodBankManagementSystem.DAL;
+using DAL.Data.DatabaseModels.User;
 using DAL.Data.Seed;
 using General;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -57,9 +58,40 @@ try
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
     builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddRoles<Role>()
+        .AddRoleManager<RoleManager<Role>>()
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddSignInManager()
         .AddDefaultTokenProviders();
+
+    // Adding Authentication and Authorization
+    //builder.Services.AddAuthentication(options =>
+    //{
+    //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //}).AddJwtBearer(options =>
+    //{
+    //    options.TokenValidationParameters = new TokenValidationParameters
+    //    {
+    //        ValidateIssuer = true,
+    //        ValidateAudience = true,
+    //        ValidateLifetime = true,
+    //        ValidateIssuerSigningKey = true,
+    //        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+    //        ValidAudience = builder.Configuration["Jwt:Audience"],
+    //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    //    };
+    //});
+
+    //builder.Services.AddAuthorization(options =>
+    //{
+    //    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    //    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    //    options.AddPolicy("BankPhysicianOnly", policy => policy.RequireRole("BankPhysician"));
+    //    options.AddPolicy("HospitalPhysicianOnly", policy => policy.RequireRole("HospitalPhysician"));
+    //    options.AddPolicy("DonorPhysicianOnly", policy => policy.RequireRole("DonorPhysician"));
+    //});
+
 
     builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
@@ -150,15 +182,19 @@ try
         })
     .CreateLogger();
 
-    var app = builder.Build();
 
+    var app = builder.Build();
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.Migrate();
         // Seed the database with initial data.
         Seed.SeedData(dbContext);
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+        await RolesSeed.SeedRolesAsync(roleManager);
     }
+
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

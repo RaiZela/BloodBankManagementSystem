@@ -1,6 +1,5 @@
 ﻿using BloodBankManagementSystem.BLL;
 using Microsoft.Extensions.Logging;
-using System.Security.Policy;
 using static General.Enums;
 
 namespace BLL.Services.Users;
@@ -16,17 +15,19 @@ public interface IUserService
 
 public class UserService : IUserService
 {
-    private readonly IRepository<DbContext> _repository; // Use the appropriate DbContext type
+    private readonly IRepository<DbContext> _repository;
     private readonly ILogger<UserService> _logger;
     private readonly IMapper _mapper;
     private readonly IMessageService _messageService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public UserService(IRepository<DbContext> repository, ILogger<UserService> logger, IMapper mapper, IMessageService messageService)
+    public UserService(IRepository<DbContext> repository, ILogger<UserService> logger, IMapper mapper, IMessageService messageService, UserManager<ApplicationUser> userManager)
     {
         _repository = repository;
         _logger = logger;
         _mapper = mapper;
         _messageService = messageService;
+        _userManager = userManager;
     }
 
     public async Task<ApiResponse<bool>> CreateUserAsync(ApplicationUserViewModel user)
@@ -35,7 +36,13 @@ public class UserService : IUserService
         {
             var createdUser = await _repository.CreateAsync(_mapper.Map<ApplicationUser>(user));
             await _repository.SaveAsync();
-            return ApiResponse<bool>.ApiOkResponse(true);
+            if (createdUser is not null && createdUser.Id != Guid.Empty.ToString() && !string.IsNullOrEmpty(createdUser.Id))
+            {
+                await _userManager.AddToRoleAsync(createdUser, "User");
+                return ApiResponse<bool>.ApiOkResponse(true);
+            }
+
+            return ApiResponse<bool>.ApiBadRequestResponse("Error creating user");
         }
         catch (Exception e)
         {
@@ -94,7 +101,7 @@ public class UserService : IUserService
         try
         {
             //kontrolli i rolit per te caktuar nese mund te shohi enabled apo disabled
-            var user= await _repository.GetQueryable<ApplicationUser>(u => u.Id == userId && u.Status != General.Enums.UserStatus.Disabled).FirstOrDefaultAsync();
+            var user = await _repository.GetQueryable<ApplicationUser>(u => u.Id == userId && u.Status != General.Enums.UserStatus.Disabled).FirstOrDefaultAsync();
 
             if (user == null)
                 return ApiResponse<ApplicationUserViewModel>.ApiNotFoundResponse(_messageService.GetMessage(MessageKeys.Not_Found!));
@@ -127,4 +134,6 @@ public class UserService : IUserService
             throw;
         }
     }
+
+
 }

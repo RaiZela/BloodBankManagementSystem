@@ -29,7 +29,9 @@
                                               @bind-Value="Donor.IdNumber" For="@(() => Donor.IdNumber)" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="4">
-                                <MudDatePicker Label="Birthday" Editable="true" @bind-Date="Donor.Birthday" Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" Placeholder="Birthday" Required=true />
+                                <MudDatePicker Label="Birthday" Editable="true" @bind-Date="Donor.Birthday" 
+                                Mask="@(new DateMask("dd.MM.yyyy"))" DateFormat="dd.MM.yyyy" 
+                                Placeholder="Birthday" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="4">
                                 <MudTextField Label="Email" Class="mt-3"
@@ -74,7 +76,7 @@
                         </MudGrid>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Disabled="@disabled" ButtonType="ButtonType.Submit" OnClick="() => RegisterDonor(Donor)" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                        <MudButton Disabled="@disabled" ButtonType="ButtonType.Submit" OnClick="() => RegisterDonor(Donor)" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Next</MudButton>
                     </MudCardActions>
                 </MudCard>
 
